@@ -1,0 +1,13 @@
+// Example fragment - merge into your Kilo permission / skill ACL config.
+// Exact key names vary by Kilo build; treat this as intent, not a drop-in for every version.
+//
+// Intent: deny-default for skills; allow only harness skills listed below.
+{
+  "permission.skill": {
+    "default": "deny",
+    "allow": [
+      "agency-advance",
+      "agency-replay"
+    ]
+  }
+}

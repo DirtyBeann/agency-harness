@@ -1,0 +1,19 @@
+{
+  "schema": "SecurityVerdict/v1",
+  "decision": "deny",
+  "risk_level": "high",
+  "reason": "Smoke fixture: deny path",
+  "findings": [
+    {
+      "severity": "high",
+      "category": "auth",
+      "message": "auth bypass suspected"
+    }
+  ],
+  "failureModes": [
+    "auth_bypass"
+  ],
+  "evidence_refs": [
+    "tests/fixtures/verdicts/security-deny.json"
+  ]
+}

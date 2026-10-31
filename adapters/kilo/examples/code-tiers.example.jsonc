@@ -1,0 +1,69 @@
+﻿// Example only. Merge into your kilo agents map.
+// IMPORTANT: do NOT add "model" on code-c/b/a if you want GUI swaps to stick.
+// Conductor spawn must still pass an explicit model on every APPLY child.
+
+{
+  "code-c": {
+    "steps": 40,
+    "description": "Cheap/fast implementer tier C. Model is GUI-owned.",
+    "mode": "all",
+    "options": { "displayName": "Code C (cheap)", "id": "code-c" },
+    "prompt": "You are code-c (cheap/fast implementer). Small scoped APPLY only. Follow the locked plan. Escalate to code-b/code-a when needed. Model comes from GUI or spawn override.",
+    "permission": {
+      "read": "allow",
+      "edit": "allow",
+      "bash": "allow",
+      "glob": "allow",
+      "grep": "allow",
+      "list": "allow",
+      "webfetch": "allow",
+      "websearch": "allow",
+      "todowrite": "allow",
+      "question": "allow",
+      "task": "allow",
+      "skill": { "*": "deny" }
+    }
+  },
+  "code-b": {
+    "steps": 40,
+    "description": "Default implementer tier B. Model is GUI-owned.",
+    "mode": "all",
+    "options": { "displayName": "Code B (default)", "id": "code-b" },
+    "prompt": "You are code-b (default implementer). Execute locked plans. No plan rewrites. Model comes from GUI or spawn override.",
+    "permission": {
+      "read": "allow",
+      "edit": "allow",
+      "bash": "allow",
+      "glob": "allow",
+      "grep": "allow",
+      "list": "allow",
+      "webfetch": "allow",
+      "websearch": "allow",
+      "todowrite": "allow",
+      "question": "allow",
+      "task": "allow",
+      "skill": { "*": "deny" }
+    }
+  },
+  "code-a": {
+    "steps": 40,
+    "description": "Max-quality implementer tier A. Model is GUI-owned.",
+    "mode": "all",
+    "options": { "displayName": "Code A (max)", "id": "code-a" },
+    "prompt": "You are code-a (max implementer). Hard / escalated APPLY. You are a tier title, not a model name. Model comes from GUI or spawn override. Not conductor-model-by-default.",
+    "permission": {
+      "read": "allow",
+      "edit": "allow",
+      "bash": "allow",
+      "glob": "allow",
+      "grep": "allow",
+      "list": "allow",
+      "webfetch": "allow",
+      "websearch": "allow",
+      "todowrite": "allow",
+      "question": "allow",
+      "task": "allow",
+      "skill": { "*": "deny" }
+    }
+  }
+}

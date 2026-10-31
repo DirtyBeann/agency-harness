@@ -1,0 +1,8 @@
+{
+  "expect": "fail",
+  "exit_code": 1,
+  "reason_contains": [
+    "same_pool",
+    "[ADD_PROVIDER]"
+  ]
+}

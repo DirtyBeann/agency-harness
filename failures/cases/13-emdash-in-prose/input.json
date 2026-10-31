@@ -1,0 +1,8 @@
+{
+  "id": "13-emdash-in-prose",
+  "title": "owner-facing prose contains em dash",
+  "check": "l1_emdash_slop",
+  "text": "This note uses an em dash — which must fail the L1 gate.",
+  "fail_on_emdash": true,
+  "fail_on_slop": false
+}

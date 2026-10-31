@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://[PRIVATE_WORKSPACE].local/harness/security_verdict.schema.json",
+  "title": "SecurityVerdict",
+  "description": "SecurityVerdict/v1. Security-reviewer hard gate. Fail-closed: writers must jsonschema-validate and refuse on failure. decision escalate is first-class (deferral). Evidence labels/paths only - no secret material, raw tool dumps, or PHI.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "decision",
+    "risk_level",
+    "reason",
+    "findings",
+    "failureModes",
+    "evidence_refs"
+  ],
+  "properties": {
+    "schema": {
+      "const": "SecurityVerdict/v1"
+    },
+    "decision": {
+      "enum": [
+        "allow",
+        "deny",
+        "escalate"
+      ]
+    },
+    "risk_level": {
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low",
+        "info"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "findings": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "severity",
+          "category",
+          "message"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "severity": {
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low",
+              "info"
+            ]
+          },
+          "category": {
+            "enum": [
+              "auth",
+              "rls",
+              "phi",
+              "secrets",
+              "headers",
+              "tenancy",
+              "other"
+            ]
+          },
+          "file": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "line": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "required_fix": {
+            "type": "string",
+            "maxLength": 500
+          }
+        }
+      }
+    },
+    "failureModes": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "string",
+        "maxLength": 128
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "string",
+        "maxLength": 512
+      }
+    }
+  },
+  "allOf": [
+    {
+      "description": "Reject secret-shaped substrings in free-text",
+      "properties": {
+        "reason": {
+          "not": {
+            "pattern": "(?i)(sk_live_|sk_test_|rk_live_|whsec_|ghp_|github_pat_|gho_|xox[baprs]-|BEGIN [A-Z ]*PRIVATE KEY|eyJ[A-Za-z0-9_-]{20,}|SENTRY_ACCESS_TOKEN|API_KEY\\\\s*=|password\\\\s*=|Bearer\\\\s+[A-Za-z0-9._\\\\-]{20,})"
+          }
+        }
+      }
+    }
+  ]
+}

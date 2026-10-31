@@ -1,0 +1,21 @@
+{
+  "id": "01-skeptic-false-pass",
+  "title": "Skeptic claims PASS without evidence",
+  "check": "skeptic_pass_requires_evidence",
+  "kind": "skeptic",
+  "payload": {
+    "schema": "SkepticVerdict/v1",
+    "verdict": "PASS",
+    "rounds_used": 1,
+    "evidence_index": [],
+    "artifact_paths": [],
+    "failures": [],
+    "skipped": [],
+    "unverified": [
+      "claim:feature_complete_without_proof"
+    ],
+    "incomplete": [],
+    "violations": [],
+    "next": "advance to DEV_CANDIDATE"
+  }
+}

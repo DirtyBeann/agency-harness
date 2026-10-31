@@ -1,0 +1,23 @@
+{
+  "schema": "ReviewVerdict/v1",
+  "decision": "fail",
+  "summary": "Smoke fixture: review fail",
+  "requirementsChecked": [
+    {
+      "id": "AC-1",
+      "status": "fail"
+    }
+  ],
+  "issues": [
+    {
+      "severity": "major",
+      "message": "missing tests"
+    }
+  ],
+  "failureModes": [
+    "incomplete_verify"
+  ],
+  "evidence_refs": [
+    "tests/fixtures/verdicts/review-fail.json"
+  ]
+}

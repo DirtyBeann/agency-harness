@@ -1,0 +1,21 @@
+{
+  "id": "03-critic-without-vision",
+  "title": "UI critic spawned without vision flag",
+  "check": "critic_vision",
+  "role": "gauntlet-critic",
+  "requires_vision": false,
+  "lane": "design",
+  "payload": {
+    "schema": "GauntletRound/v1",
+    "run_id": "synth-no-vision-001",
+    "round": 1,
+    "bar_ref": "bars/synth-dashboard-v1",
+    "builder_pool": "pool-[ADD_MODEL_HERE]",
+    "critic_pool": "pool-a",
+    "verdict": "WIN",
+    "artifact_paths": [
+      "artifacts/synth/dash.png"
+    ]
+  }
+}
+

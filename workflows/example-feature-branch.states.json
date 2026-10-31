@@ -1,0 +1,498 @@
+{
+  "id": "example-feature-branch",
+  "version": "1.0.3",
+  "layer": "L4",
+  "lane": "platform-code",
+  "source": "Harness-Final.md §2, §7 (2026-09-08) | P2-2 fail-closed SecurityVerdict 2026-09-08 | P2-2c Coder WARN enum+helpers 2026-09-08 | P2-3 nested example-ui-gauntlet 2026-09-08",
+  "branch_policy": {
+    "develop_on": "dev",
+    "live_branch_a": "main",
+    "live_branch_b": "master",
+    "land_target": "dev",
+    "live_merge_owner": "owner",
+    "forbidden_land_targets": [
+      "main",
+      "master"
+    ]
+  },
+  "runtime": {
+    "ask_max_rounds_before_start": true,
+    "max_rounds_range": [
+      1,
+      100
+    ],
+    "fresh_worker_per_round": true,
+    "thin_ledger_only_on_lead": true,
+    "sub_dead_must_ask": true,
+    "sub_dead_options": [
+      "switch-sub",
+      "extend",
+      "stop"
+    ],
+    "governor": {
+      "optional": true,
+      "min_rounds_to_enable": 10,
+      "cadence_rounds": [
+        5,
+        10
+      ],
+      "skip_if_max_rounds_lte": 5,
+      "role": "meta-trajectory-only",
+      "must_not": [
+        "rewrite_PLAN",
+        "judge_bar",
+        "judge_diff",
+        "judge_security",
+        "judge_done_claims"
+      ],
+      "schema": "GovernorVerdict/v1"
+    },
+    "gui_pin_is_primary": true,
+    "failover_unit": "subscription_pool",
+    "anti_collision": [
+      "builder!=critic_lab",
+      "builder!=governor_lab",
+      "critic!=governor_lab"
+    ],
+    "pool_map": "../adapters/pools.example.json",
+    "pool_doc": "docs/pool-rules.example.md"
+  },
+  "initial": "HOLD",
+  "terminal": [
+    "LIVE_GO",
+    "LIVE_NOGO",
+    "ABORTED",
+    "FINAL_FAIL"
+  ],
+  "states": {
+    "HOLD": {
+      "description": "Plan-only / owner hold. No host-agent-config edits, no APPLY.",
+      "mutate_src": false,
+      "on_enter": [
+        "deny_src_edits",
+        "deny_live_merge"
+      ]
+    },
+    "SCOPE_LOCKED": {
+      "description": "Human/operator locked scope, non-goals, and lane (platform). Gauntlet OFF for auth/RLS/Stripe/webhooks.",
+      "required_fields": [
+        "goal",
+        "non_goals",
+        "lane"
+      ],
+      "mutate_src": false
+    },
+    "ARCHITECT_READY": {
+      "description": "Architect handed design: AC seeds, file exclusivity, risks/CONFIRM, test plan sketch. No PLAN.md yet. No app code.",
+      "required_fields": [
+        "design_summary",
+        "confirm_gaps"
+      ],
+      "mutate_src": false,
+      "actor": "Architect"
+    },
+    "PLAN_APPROVED": {
+      "description": "PAUL PLAN.md approved/execute. AC Given/When/Then, files_modified, verify, boundaries, depends_on. Disk path or pasted body for cloud.",
+      "required_fields": [
+        "plan_path_or_body",
+        "acceptance_criteria",
+        "files_modified",
+        "boundaries"
+      ],
+      "mutate_src": false,
+      "actor": "Plan",
+      "on_enter": [
+        "ask_max_rounds_if_looping"
+      ]
+    },
+    "APPLYING": {
+      "description": "Code|Debug apply against PLAN. Pathspec commits. Command-auditor required before risky batches.",
+      "mutate_src": true,
+      "actor": [
+        "Code",
+        "Debug"
+      ],
+      "gates": {
+        "command_auditor_risky_batches": {
+          "required": true,
+          "triggers": [
+            "git_write",
+            "migrate",
+            "deploy",
+            "secret_rotation",
+            "live_stripe"
+          ],
+          "fail_closed": true
+        }
+      },
+      "on_enter": [
+        "assert_branch_is_dev",
+        "forbid_land_main_master"
+      ]
+    },
+    "VERIFY": {
+      "description": "Test-engineer / CI / planned verifies from PLAN. Optional behavior-preserving simplifier after green tests only.",
+      "mutate_src": false,
+      "actors": [
+        "Test-engineer",
+        "Code-simplifier?"
+      ],
+      "required_evidence": [
+        "test_command",
+        "test_result"
+      ]
+    },
+    "REVIEW": {
+      "description": "Code-reviewer ∥ Security-reviewer. No merge. No implement unless tiny patch asked. BOTH ReviewVerdict/v1 and SecurityVerdict/v1 required (validate_verdict.py). Missing/invalid = fail-closed. Security decision must be allow to advance; deny reworks; escalate asks owner (escalate ≠ allow).",
+      "mutate_src": false,
+      "actors": [
+        "Code-reviewer",
+        "Security-reviewer"
+      ],
+      "parallel": true,
+      "required_evidence": [
+        "ReviewVerdict",
+        "SecurityVerdict"
+      ],
+      "fail_closed": true,
+      "gates": {
+        "verdicts": {
+          "required": true,
+          "validate_with": "scripts/validate_verdict.py",
+          "review_schema": "ReviewVerdict/v1",
+          "security_schema": "SecurityVerdict/v1",
+          "missing_or_invalid": "fail_closed",
+          "security_allow_only_to_skeptic": true,
+          "escalate_is_not_allow": true,
+          "notes": "P2-2 Security blocker fix 2026-09-08: SecurityVerdict required; escalate/missing/invalid must not enter SKEPTIC"
+        }
+      }
+    },
+    "SKEPTIC": {
+      "description": "Code-skeptic evidence gate on done claims. REQUIRED before DEV_CANDIDATE or any done.",
+      "mutate_src": false,
+      "actor": "Code-skeptic",
+      "required_evidence": [
+        "SkepticVerdict"
+      ],
+      "fail_closed": true
+    },
+    "DEV_CANDIDATE": {
+      "description": "PR opened/landed targeting dev only after Reviewer sign. Never main/master.",
+      "mutate_src": false,
+      "required_fields": [
+        "pr_url",
+        "base_branch"
+      ],
+      "invariants": [
+        "base_branch == 'dev'",
+        "base_branch not in ['main','master']"
+      ],
+      "on_enter": [
+        "assert_reviewer_signed",
+        "assert_skeptic_pass"
+      ]
+    },
+    "OWNER_TEST": {
+      "description": "owner tests dev: e2e + live browser visual (desktop, iOS, Android).",
+      "mutate_src": false,
+      "actor": "owner"
+    },
+    "LIVE_GO": {
+      "description": "owner explicitly said ship to live. Only owner merges to main/master.",
+      "terminal": true,
+      "actor": "owner",
+      "mutate_src": false
+    },
+    "LIVE_NOGO": {
+      "description": "Live remains frozen. Fix on dev or stop.",
+      "terminal": true,
+      "mutate_src": false
+    },
+    "SUB_DEAD": {
+      "description": "Subscription/pool exhausted (429/cap). Interrupt APPLYING or nested loops. Ask owner; never silent die. Mark pool-* id dead for run. Failover must change subscription_pool across ALL gateways (host-native and gateway mirror = one pool; no host-A-model-X → gateway-B-model-X).",
+      "mutate_src": false,
+      "on_enter": [
+        "ask_owner_switch_extend_stop",
+        "mark_pool_dead_for_run"
+      ],
+      "resume_to": [
+        "APPLYING",
+        "VERIFY",
+        "REVIEW",
+        "GOV_REVIEW",
+        "ABORTED"
+      ]
+    },
+    "GOV_REVIEW": {
+      "description": "Loop Governor meta review of thin ledger + latest artifacts. Optional when max_rounds >= 10. Recommend continue/stop/reassess. Does not rewrite PLAN.",
+      "mutate_src": false,
+      "actor": "Loop-Governor",
+      "required_evidence": [
+        "GovernorVerdict/v1"
+      ],
+      "optional": true
+    },
+    "ABORTED": {
+      "description": "owner or Governor STOP_REASSESS / human abort. No done claim.",
+      "terminal": true,
+      "mutate_src": false
+    },
+    "FINAL_FAIL": {
+      "description": "Hard fail after caps or skeptic/review fail-closed without approved rework path.",
+      "terminal": true,
+      "mutate_src": false
+    }
+  },
+  "transitions": [
+    {
+      "from": "HOLD",
+      "to": "SCOPE_LOCKED",
+      "when": "owner_lifts_hold_and_scope_set"
+    },
+    {
+      "from": "SCOPE_LOCKED",
+      "to": "ARCHITECT_READY",
+      "when": "architect_handoff_complete"
+    },
+    {
+      "from": "ARCHITECT_READY",
+      "to": "PLAN_APPROVED",
+      "when": "paul_plan_approved_or_execute"
+    },
+    {
+      "from": "PLAN_APPROVED",
+      "to": "APPLYING",
+      "when": "max_rounds_asked_if_needed"
+    },
+    {
+      "from": "APPLYING",
+      "to": "VERIFY",
+      "when": "apply_tasks_complete"
+    },
+    {
+      "from": "APPLYING",
+      "to": "SUB_DEAD",
+      "when": "pool_429_or_cap"
+    },
+    {
+      "from": "APPLYING",
+      "to": "GOV_REVIEW",
+      "when": "governor_tick_and_rounds_gte_10"
+    },
+    {
+      "from": "VERIFY",
+      "to": "REVIEW",
+      "when": "verify_pass"
+    },
+    {
+      "from": "VERIFY",
+      "to": "APPLYING",
+      "when": "verify_fail_rework"
+    },
+    {
+      "from": "VERIFY",
+      "to": "SUB_DEAD",
+      "when": "pool_429_or_cap"
+    },
+    {
+      "from": "REVIEW",
+      "to": "SKEPTIC",
+      "when": "ReviewVerdict.decision==pass && SecurityVerdict.decision==allow && verdicts_validated",
+      "notes": "escalate/missing/invalid/deny must NOT take this edge"
+    },
+    {
+      "from": "REVIEW",
+      "to": "ABORTED",
+      "when": "SecurityVerdict.decision==escalate",
+      "notes": "escalate ≠ allow; owner must decide; do not coerce to allow or skeptic"
+    },
+    {
+      "from": "REVIEW",
+      "to": "FINAL_FAIL",
+      "when": "SecurityVerdict_missing_or_invalid || ReviewVerdict_missing_or_invalid",
+      "notes": "fail-closed: no implicit allow"
+    },
+    {
+      "from": "REVIEW",
+      "to": "APPLYING",
+      "when": "ReviewVerdict.decision in [fail,revise] || SecurityVerdict.decision==deny",
+      "notes": "security deny or review fail/revise → rework"
+    },
+    {
+      "from": "REVIEW",
+      "to": "SUB_DEAD",
+      "when": "pool_429_or_cap"
+    },
+    {
+      "from": "SKEPTIC",
+      "to": "DEV_CANDIDATE",
+      "when": "SkepticVerdict.verdict==PASS",
+      "notes": "SkepticVerdict.verdict field (PASS|NOT_READY|BLOCKED); not boolean .pass"
+    },
+    {
+      "from": "SKEPTIC",
+      "to": "APPLYING",
+      "when": "SkepticVerdict.verdict==NOT_READY",
+      "notes": "NOT_READY = rework path"
+    },
+    {
+      "from": "SKEPTIC",
+      "to": "FINAL_FAIL",
+      "when": "SkepticVerdict.verdict==BLOCKED",
+      "notes": "BLOCKED = fail-closed"
+    },
+    {
+      "from": "DEV_CANDIDATE",
+      "to": "OWNER_TEST",
+      "when": "landed_or_ready_on_dev"
+    },
+    {
+      "from": "OWNER_TEST",
+      "to": "LIVE_GO",
+      "when": "owner_says_ship"
+    },
+    {
+      "from": "OWNER_TEST",
+      "to": "LIVE_NOGO",
+      "when": "owner_holds_or_finds_blockers"
+    },
+    {
+      "from": "OWNER_TEST",
+      "to": "APPLYING",
+      "when": "owner_requests_dev_fix"
+    },
+    {
+      "from": "SUB_DEAD",
+      "to": "APPLYING",
+      "when": "owner_switch_sub_or_extend"
+    },
+    {
+      "from": "SUB_DEAD",
+      "to": "ABORTED",
+      "when": "owner_stop"
+    },
+    {
+      "from": "GOV_REVIEW",
+      "to": "APPLYING",
+      "when": "GovernorVerdict.recommend==continue"
+    },
+    {
+      "from": "GOV_REVIEW",
+      "to": "VERIFY",
+      "when": "GovernorVerdict.recommend==continue && phase==verify"
+    },
+    {
+      "from": "GOV_REVIEW",
+      "to": "ABORTED",
+      "when": "GovernorVerdict.recommend in [stop,reassess]"
+    },
+    {
+      "from": "*",
+      "to": "ABORTED",
+      "when": "owner_abort"
+    }
+  ],
+  "illegal_transitions": [
+    {
+      "from": "APPLYING",
+      "to": "DEV_CANDIDATE",
+      "reason": "Skeptic required before done/candidate"
+    },
+    {
+      "from": "APPLYING",
+      "to": "LIVE_GO",
+      "reason": "Cannot skip to live"
+    },
+    {
+      "from": "VERIFY",
+      "to": "DEV_CANDIDATE",
+      "reason": "Must pass REVIEW and SKEPTIC"
+    },
+    {
+      "from": "REVIEW",
+      "to": "DEV_CANDIDATE",
+      "reason": "Skeptic required"
+    },
+    {
+      "from": "SKEPTIC",
+      "to": "LIVE_GO",
+      "reason": "Live only after OWNER_TEST and owner ship"
+    },
+    {
+      "from": "DEV_CANDIDATE",
+      "to": "LIVE_GO",
+      "reason": "OWNER_TEST required; owner only"
+    },
+    {
+      "any": "merge_to_main_or_master_by_agent",
+      "reason": "Land on dev only; owner merges live"
+    },
+    {
+      "any": "gauntlet_on_auth_rls_stripe_webhook",
+      "reason": "Wrong tool; Security+skeptic+tests"
+    },
+    {
+      "any": "vi_or_gauntlet_merge",
+      "reason": "VI/gauntlet never merge"
+    },
+    {
+      "any": "governor_rewrite_plan",
+      "reason": "Governor is meta-only above Plan/Architect"
+    },
+    {
+      "any": "failover_same_subscription_pool",
+      "reason": "host-native and gateway mirror of same sub are ONE pool (see adapters/pools.example.json critical_owner_rule)"
+    },
+    {
+      "any": "builder_critic_same_lab",
+      "reason": "Anti-collision"
+    },
+    {
+      "any": "code_to_done_without_skeptic",
+      "reason": "Illegal Code→done"
+    },
+    {
+      "any": "automatic_payg_with_prod_secrets",
+      "reason": "owner confirm; scrub secrets"
+    },
+    {
+      "from": "REVIEW",
+      "to": "SKEPTIC",
+      "when_forbidden": "SecurityVerdict.decision in [deny,escalate] || missing || invalid",
+      "reason": "P2-2 fail-closed: only SecurityVerdict.allow + valid ReviewVerdict.pass may enter SKEPTIC"
+    }
+  ],
+  "risky_batch_auditor": {
+    "actor": "Command-auditor",
+    "required_before": [
+      "git_write",
+      "migrate",
+      "deploy",
+      "secret_rotation",
+      "live_stripe"
+    ],
+    "mutate_src": false,
+    "task": "deny",
+    "bash": "read-only-inspect"
+  },
+  "canonical_runner_bind": true,
+  "slim_stub": "./example-feature-branch.json",
+  "nested_workflows": {
+    "example-ui-gauntlet": {
+      "canonical": "./example-ui-gauntlet.states.json",
+      "human": "./example-ui-gauntlet.md",
+      "when": "taste_risk_ui",
+      "enter_after": "SCOPE_LOCKED",
+      "off_for": [
+        "auth",
+        "rls",
+        "stripe",
+        "webhooks",
+        "phi",
+        "secrets_rotation"
+      ],
+      "notes": "Gauntlet WIN != ship. Exit re-VI then parent VERIFY/REVIEW/SKEPTIC. Never skip to DEV_CANDIDATE."
+    }
+  }
+}

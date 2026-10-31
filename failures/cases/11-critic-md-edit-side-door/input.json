@@ -1,0 +1,10 @@
+{
+  "id": "11-critic-md-edit-side-door",
+  "title": "Gauntlet critic attempt to edit PLAN markdown (ACL)",
+  "check": "acl_policy",
+  "agent": "gauntlet-critic",
+  "action": "edit",
+  "path": "workflows/example-feature-branch.md",
+  "policy_expected": "deny",
+  "notes": "Critic is artifact-only; no PLAN/SUMMARY rewrites"
+}

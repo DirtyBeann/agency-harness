@@ -1,0 +1,36 @@
+# EXAMPLE ONLY. Merge into ~/.codex/config.toml by hand.
+# No API keys here. Sign in with `codex login`, or put your key in an
+# environment variable and reference it with env_key.
+
+# Model for this harness. Pick any model your account can use.
+model = "[ADD_MODEL_HERE]"
+model_reasoning_effort = "medium"   # low | medium | high
+
+# Safe defaults for harness work: Codex may edit inside the repo and run
+# the binder scripts, but asks before anything outside the sandbox.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+network_access = false   # the harness scripts do not need the network
+
+# Mark this repo as trusted so Codex loads its AGENTS.md and project skills.
+# Replace the path with where you cloned the repo.
+[projects."[ADD_ABSOLUTE_PATH_TO]/agency-harness-universal"]
+trust_level = "trusted"
+
+# Optional: a separate profile for reviewer / security / skeptic roles,
+# so the critic is not the same model as the builder.
+# Use with: codex --profile harness-critic
+[profiles.harness-critic]
+model = "[ADD_DIFFERENT_MODEL_HERE]"
+model_reasoning_effort = "high"
+approval_policy = "on-request"
+sandbox_mode = "read-only"
+
+# Optional: point Codex at your own OpenAI-compatible gateway.
+# [model_providers.my-gateway]
+# name = "My gateway"
+# base_url = "[ADD_LLM_GATEWAY_BASE_URL]"
+# env_key = "[ADD_API_KEY_ENV]"
+# wire_api = "responses"

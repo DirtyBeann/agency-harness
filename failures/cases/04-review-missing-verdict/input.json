@@ -1,0 +1,17 @@
+{
+  "id": "04-review-missing-verdict",
+  "title": "REVIEW gate without ReviewVerdict file",
+  "check": "gate_review",
+  "review": null,
+  "security": {
+    "schema": "SecurityVerdict/v1",
+    "decision": "allow",
+    "risk_level": "low",
+    "reason": "Synthetic fixture: security allow only",
+    "findings": [],
+    "failureModes": [],
+    "evidence_refs": [
+      "failures/cases/04-review-missing-verdict/input.json"
+    ]
+  }
+}

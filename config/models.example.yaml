@@ -1,0 +1,38 @@
+# Copy to models.yaml and fill every placeholder.
+# Do not commit real API keys.
+
+version: 1
+
+# Default chat model for general coding agents
+default_chat:
+  provider: "[ADD_PROVIDER]"   # e.g. openai-compatible gateway, anthropic, local
+  model: "[ADD_MODEL_HERE]"
+  base_url: "[ADD_LLM_GATEWAY_BASE_URL]"  # e.g. http://127.0.0.1:PORT/v1
+  api_key_env: "[ADD_API_KEY_ENV]"       # name of env var; never paste the key here
+
+# Hard tasks (security / skeptic / go-no-go style work)
+hard_task:
+  provider: "[ADD_PROVIDER]"
+  model: "[ADD_MODEL_HERE]"
+  base_url: "[ADD_LLM_GATEWAY_BASE_URL]"
+  api_key_env: "[ADD_API_KEY_ENV]"
+
+# Fast / cheap helper
+fast:
+  provider: "[ADD_PROVIDER]"
+  model: "[ADD_MODEL_HERE]"
+  base_url: "[ADD_LLM_GATEWAY_BASE_URL]"
+  api_key_env: "[ADD_API_KEY_ENV]"
+
+# Vision / UI critic (optional)
+vision:
+  provider: "[ADD_PROVIDER]"
+  model: "[ADD_MODEL_HERE]"
+  base_url: "[ADD_LLM_GATEWAY_BASE_URL]"
+  api_key_env: "[ADD_API_KEY_ENV]"
+
+# Pool failover policy (document only - supply your own pool map elsewhere)
+failover:
+  unit: subscription_pool
+  rule: "Never hop between two routes that burn the same upstream subscription."
+  pool_map_path: "[ADD_POOL_MAP_PATH]"  # optional; omit until you have one

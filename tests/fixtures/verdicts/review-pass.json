@@ -1,0 +1,16 @@
+{
+  "schema": "ReviewVerdict/v1",
+  "decision": "pass",
+  "summary": "Smoke fixture: clean review pass",
+  "requirementsChecked": [
+    {
+      "id": "AC-1",
+      "status": "pass"
+    }
+  ],
+  "issues": [],
+  "failureModes": [],
+  "evidence_refs": [
+    "tests/fixtures/verdicts/review-pass.json"
+  ]
+}

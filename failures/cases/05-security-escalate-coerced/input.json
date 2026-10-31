@@ -1,0 +1,40 @@
+{
+  "id": "05-security-escalate-coerced",
+  "title": "Escalate must not be treated as allow",
+  "check": "gate_review",
+  "review": {
+    "schema": "ReviewVerdict/v1",
+    "decision": "pass",
+    "summary": "Synthetic fixture: review pass alongside escalate",
+    "requirementsChecked": [
+      {
+        "id": "AC-1",
+        "status": "pass"
+      }
+    ],
+    "issues": [],
+    "failureModes": [],
+    "evidence_refs": [
+      "failures/cases/05-security-escalate-coerced/input.json"
+    ]
+  },
+  "security": {
+    "schema": "SecurityVerdict/v1",
+    "decision": "escalate",
+    "risk_level": "medium",
+    "reason": "Synthetic fixture: needs owner interrupt",
+    "findings": [
+      {
+        "severity": "medium",
+        "category": "other",
+        "message": "human judgment required"
+      }
+    ],
+    "failureModes": [
+      "needs_human"
+    ],
+    "evidence_refs": [
+      "failures/cases/05-security-escalate-coerced/input.json"
+    ]
+  }
+}

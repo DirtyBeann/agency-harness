@@ -1,0 +1,18 @@
+{
+  "id": "06-security-verdict-extra-field",
+  "title": "SecurityVerdict additionalProperties must reject",
+  "check": "schema",
+  "kind": "security",
+  "payload": {
+    "schema": "SecurityVerdict/v1",
+    "decision": "allow",
+    "risk_level": "low",
+    "reason": "Synthetic fixture: extra field present",
+    "findings": [],
+    "failureModes": [],
+    "evidence_refs": [
+      "failures/cases/06-security-verdict-extra-field/input.json"
+    ],
+    "raw_tool_dump": "FORBIDDEN_EXTRA_FIELD"
+  }
+}

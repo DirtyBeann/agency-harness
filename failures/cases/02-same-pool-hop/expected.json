@@ -1,0 +1,9 @@
+{
+  "expect": "fail",
+  "exit_code": 1,
+  "reason_contains": [
+    "same_pool",
+    "builder",
+    "critic"
+  ]
+}

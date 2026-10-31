@@ -1,0 +1,8 @@
+{
+  "expect": "fail",
+  "exit_code": 1,
+  "reason_contains": [
+    "emdash",
+    "U+2014"
+  ]
+}

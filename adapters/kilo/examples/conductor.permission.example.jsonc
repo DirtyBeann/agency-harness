@@ -1,0 +1,85 @@
+﻿// EXAMPLE ONLY - merge into your host agent config carefully.
+// Agent key suggestion: "conductor" (mode: primary)
+// Keep host Orchestrator / equivalent disabled if present.
+{
+  "read": "allow",
+  "grep": "allow",
+  "glob": "allow",
+  "list": "allow",
+  "webfetch": "allow",
+  "websearch": "allow",
+  "question": "allow",
+  "todowrite": "allow",
+  "plan_exit": "allow",
+  // First week: prefer "ask"; switch to "allow" only after you trust Agent Manager fan-out
+  "agent_manager": "ask",
+  "doom_loop": "ask",
+  "edit": {
+    "*": "deny",
+    ".kilo/plans/*.md": "allow",
+    ".plans/*.md": "allow",
+    ".opencode/plans/*.md": "allow",
+    // Conductor must NOT rewrite locked PAUL artifacts - Plan agent owns .paul/**
+    ".paul/**": "deny",
+    "**/ledger/**": "deny",
+    "**/workflows/**": "deny",
+    "**/contracts/**": "deny",
+    "**/flags/**": "deny",
+    "**/pools/**": "deny",
+    "**/.env": "deny",
+    "**/.env.*": "deny",
+    "**/kilo.jsonc": "deny",
+    "**/kilo.json": "deny",
+    "**/*secret*": "deny",
+    "**/*credential*": "deny"
+  },
+  "bash": {
+    "*": "deny",
+    "git status*": "allow",
+    "git log*": "allow",
+    "git diff*": "allow",
+    "git show*": "allow",
+    "git branch*": "allow",
+    "pwd": "allow",
+    "ls*": "allow",
+    "dir": "allow",
+    "cat*": "ask",
+    "type *": "ask",
+    "rg*": "allow",
+    "findstr*": "allow",
+    "python *run_state.py*": "allow",
+    "python *validate_verdict.py*": "allow",
+    "python *gate_review.py*": "allow",
+    "python *check_flags.py*": "allow",
+    "python *binder_smoke.py*": "allow",
+    "python *advance.py*": "ask",
+    "*pause*": "ask",
+    "*payg*": "ask"
+  },
+  "task": {
+    "architect": "allow",
+    "plan": "allow",
+    "code": "allow",
+    "debug": "allow",
+    "frontend-specialist": "allow",
+    "security-reviewer": "allow",
+    "code-reviewer": "allow",
+    "code-skeptic": "allow",
+    "command-auditor": "allow",
+    "test-engineer": "allow",
+    "visual-inspector": "allow",
+    "explore": "allow",
+    "general": "allow",
+    "ask": "allow",
+    "*": "deny"
+  },
+  "skill": {
+    "paul": "allow",
+    "brainstorming": "allow",
+    "using-superpowers": "allow",
+    "writing-plans": "deny",
+    "executing-plans": "deny",
+    "subagent-driven-development": "deny",
+    "*": "deny"
+  }
+}

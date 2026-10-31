@@ -1,0 +1,19 @@
+{
+  "schema": "SecurityVerdict/v1",
+  "decision": "escalate",
+  "risk_level": "medium",
+  "reason": "Smoke fixture: escalate for [OWNER]",
+  "findings": [
+    {
+      "severity": "medium",
+      "category": "other",
+      "message": "needs human judgment"
+    }
+  ],
+  "failureModes": [
+    "needs_human"
+  ],
+  "evidence_refs": [
+    "tests/fixtures/verdicts/security-escalate.json"
+  ]
+}

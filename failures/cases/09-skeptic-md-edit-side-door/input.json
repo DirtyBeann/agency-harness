@@ -1,0 +1,10 @@
+{
+  "id": "09-skeptic-md-edit-side-door",
+  "title": "Skeptic attempt to edit policy markdown (ACL)",
+  "check": "acl_policy",
+  "agent": "code-skeptic",
+  "action": "edit",
+  "path": "docs/governor-acl.md",
+  "policy_expected": "deny",
+  "notes": "P2-1 closed md edit side door; verdict JSON / chat only"
+}

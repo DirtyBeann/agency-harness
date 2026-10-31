@@ -1,0 +1,9 @@
+{
+  "id": "08-gauntlet-win-skip-skeptic",
+  "title": "Gauntlet WIN cannot skip to DEV_CANDIDATE",
+  "check": "illegal_transition",
+  "from_state": "WIN",
+  "to_state": "DEV_CANDIDATE",
+  "workflow": "example-ui-gauntlet->example-feature-branch",
+  "claimed_reason": "gauntlet WIN means ship-ready; skip parent REVIEW/SKEPTIC"
+}

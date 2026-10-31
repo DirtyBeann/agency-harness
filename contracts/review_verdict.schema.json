@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://[PRIVATE_WORKSPACE].local/harness/review_verdict.schema.json",
+  "title": "ReviewVerdict",
+  "description": "ReviewVerdict/v1. Code-reviewer / quality gate. Fail-closed: writers must jsonschema-validate and refuse on failure. Evidence labels/paths only - no secret material, raw tool dumps, or PHI.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "decision",
+    "summary",
+    "requirementsChecked",
+    "issues",
+    "failureModes",
+    "evidence_refs"
+  ],
+  "properties": {
+    "schema": {
+      "const": "ReviewVerdict/v1"
+    },
+    "decision": {
+      "enum": [
+        "pass",
+        "fail",
+        "revise"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "requirementsChecked": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 128
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "fail",
+              "na"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 240
+          }
+        }
+      }
+    },
+    "issues": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "severity",
+          "message"
+        ],
+        "properties": {
+          "severity": {
+            "enum": [
+              "blocker",
+              "major",
+              "minor",
+              "nit"
+            ]
+          },
+          "file": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "line": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "failureMode": {
+            "type": "string",
+            "maxLength": 128
+          }
+        }
+      }
+    },
+    "failureModes": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "string",
+        "maxLength": 128
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "string",
+        "maxLength": 512
+      }
+    }
+  },
+  "allOf": [
+    {
+      "description": "Reject secret-shaped substrings in free-text",
+      "properties": {
+        "summary": {
+          "not": {
+            "pattern": "(?i)(sk_live_|sk_test_|rk_live_|whsec_|ghp_|github_pat_|gho_|xox[baprs]-|BEGIN [A-Z ]*PRIVATE KEY|eyJ[A-Za-z0-9_-]{20,}|SENTRY_ACCESS_TOKEN|API_KEY\\\\s*=|password\\\\s*=|Bearer\\\\s+[A-Za-z0-9._\\\\-]{20,})"
+          }
+        }
+      }
+    }
+  ]
+}

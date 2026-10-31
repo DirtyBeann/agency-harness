@@ -1,0 +1,14 @@
+{
+  "id": "07-ledger-secret-shaped",
+  "title": "Ledger must refuse secret-shaped notes",
+  "check": "ledger_append",
+  "payload": {
+    "schema": "LedgerEvent/v1",
+    "run_id": "synth_ledger_secret_001",
+    "ts": "2026-09-09T02:00:00Z",
+    "state": "REVIEW",
+    "event": "synthetic_secret_shaped",
+    "lane": "platform",
+    "notes": "synthetic marker sk_test_SYNTHETIC_NOT_A_REAL_SECRET_000 for redact test"
+  }
+}

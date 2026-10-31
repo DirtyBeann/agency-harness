@@ -1,0 +1,11 @@
+{
+  "schema": "SecurityVerdict/v1",
+  "decision": "allow",
+  "risk_level": "low",
+  "reason": "Smoke fixture: no findings",
+  "findings": [],
+  "failureModes": [],
+  "evidence_refs": [
+    "tests/fixtures/verdicts/security-allow.json"
+  ]
+}

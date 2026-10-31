@@ -1,0 +1,535 @@
+{
+  "id": "example-ui-gauntlet",
+  "version": "1.0.0",
+  "layer": "L4-nested",
+  "lane": "ui-taste",
+  "source": "Harness-Final.md section 7 (2026-09-08) | P2-3 nested example-ui-gauntlet 2026-09-08",
+  "schema_round": "GauntletRound/v1",
+  "branch_policy": {
+    "develop_on": "dev",
+    "land_target": "none",
+    "forbidden_land_targets": [
+      "main",
+      "master"
+    ],
+    "notes": "Gauntlet never lands or merges. Exit returns to parent example-feature-branch gates only."
+  },
+  "nest": {
+    "parent": "example-feature-branch",
+    "enter_from": "taste_risk_frontend_after_SCOPE_LOCKED",
+    "enter_when": "Operate vs Persuade + bar set; Frontend ONE taste pack; never from auth/RLS/Stripe/webhook lanes",
+    "exit_to": "re_VI_then_return_to_parent",
+    "join_dev_candidate": "ONLY_via_parent_gates",
+    "parent_gates_still_required": [
+      "VERIFY",
+      "REVIEW",
+      "SKEPTIC"
+    ],
+    "forbidden": [
+      "gauntlet_win_to_DEV_CANDIDATE_skip",
+      "merge_main_master",
+      "vi_merge"
+    ]
+  },
+  "security_surfaces_off": [
+    "auth",
+    "rls",
+    "stripe",
+    "webhooks",
+    "phi",
+    "secrets_rotation"
+  ],
+  "runtime": {
+    "ask_max_rounds_before_start": true,
+    "max_rounds_range": [
+      1,
+      100
+    ],
+    "fresh_worker_per_round": true,
+    "fresh_builder_per_round": true,
+    "fresh_critic_per_round": true,
+    "thin_ledger_only_on_lead": true,
+    "soft_pause_not_hard_kill": true,
+    "soft_pause_triggers": [
+      "flags/PAUSE",
+      "soft_payg_await_confirm"
+    ],
+    "gui_pin_is_primary": true,
+    "sub_dead_must_ask": true,
+    "sub_dead_options": [
+      "switch-sub",
+      "extend",
+      "stop"
+    ],
+    "governor": {
+      "optional": true,
+      "min_rounds_to_enable": 10,
+      "cadence_rounds": [
+        5,
+        10
+      ],
+      "skip_if_max_rounds_lte": 5,
+      "role": "meta-trajectory-only",
+      "must_not": [
+        "rewrite_PLAN",
+        "judge_bar",
+        "judge_diff",
+        "judge_security",
+        "judge_done_claims",
+        "judge_taste_bar"
+      ],
+      "schema": "GovernorVerdict/v1"
+    },
+    "anti_collision": [
+      "builder!=critic_lab",
+      "builder!=governor_lab",
+      "critic!=governor_lab"
+    ],
+    "pool_map": "../adapters/pools.example.json",
+    "pool_doc": "docs/pool-rules.example.md",
+    "failover_unit": "subscription_pool",
+    "critic_requires_vision": true,
+    "evidence": {
+      "critic_judges": "rendered_artifacts",
+      "artifact_kinds": [
+        "screenshots",
+        "a11y",
+        "console"
+      ],
+      "not": "builder_prose",
+      "evidence_producer_neq_verdict_writer": true,
+      "blind_ab_vs_reference": true
+    },
+    "schema_round": "GauntletRound/v1"
+  },
+  "initial": "HOLD",
+  "terminal": [
+    "WIN",
+    "FINAL_FAIL",
+    "ESCALATE",
+    "ABORTED"
+  ],
+  "states": {
+    "HOLD": {
+      "description": "Nested job not started. Plan-only / owner hold on gauntlet entry. No builder spawn.",
+      "mutate_src": false,
+      "on_enter": [
+        "deny_src_edits",
+        "deny_live_merge",
+        "deny_gauntlet_on_security_surfaces"
+      ]
+    },
+    "PAUSED": {
+      "description": "Soft pause. flags/PAUSE present or soft PAYG awaiting owner confirm. Idle resume to prior active state. Not FINAL_FAIL. Not hard kill.",
+      "mutate_src": false,
+      "soft_pause": true,
+      "on_enter": [
+        "idle_wait",
+        "preserve_round_context"
+      ],
+      "resume_to": [
+        "BAR_GATED",
+        "ROUND_N",
+        "CRITIC",
+        "FAIL_GAP",
+        "GOV_REVIEW"
+      ]
+    },
+    "BAR_GATED": {
+      "description": "Bar must be fetchable (bar_ref). Operate vs Persuade locked. ONE taste pack only. Ask max_rounds before ROUND_N.",
+      "mutate_src": false,
+      "required_fields": [
+        "bar_ref",
+        "taste_pack",
+        "operate_vs_persuade",
+        "max_rounds"
+      ],
+      "on_enter": [
+        "assert_bar_fetchable",
+        "assert_not_security_surface",
+        "ask_max_rounds_if_needed",
+        "assert_one_taste_pack"
+      ],
+      "actor": "Frontend-specialist"
+    },
+    "ROUND_N": {
+      "description": "Fresh gauntlet-builder produces candidate artifacts for this round. Thin ledger only on lead. No critic prose as evidence.",
+      "mutate_src": true,
+      "mutate_scope": "ui_candidate_artifacts_only",
+      "actor": "gauntlet-builder",
+      "fresh_worker": true,
+      "on_enter": [
+        "spawn_fresh_builder",
+        "assert_builder_neq_prior_critic_lab",
+        "forbid_land_main_master"
+      ],
+      "required_evidence": [
+        "artifact_paths"
+      ]
+    },
+    "CRITIC": {
+      "description": "Fresh gauntlet-critic with vision. Blind A/B vs reference. Judges rendered artifacts (screenshots/a11y/console) only. Emits GauntletRound/v1. Evidence producer != verdict writer.",
+      "mutate_src": false,
+      "actor": "gauntlet-critic",
+      "fresh_worker": true,
+      "requires_vision": true,
+      "blind_ab_vs_reference": true,
+      "required_evidence": [
+        "GauntletRound/v1"
+      ],
+      "on_enter": [
+        "spawn_fresh_critic",
+        "assert_critic_has_vision",
+        "assert_builder_neq_critic_lab",
+        "assert_evidence_is_rendered_artifacts"
+      ]
+    },
+    "WIN": {
+      "description": "GauntletRound.verdict==WIN. Taste bar met for this nest. Does NOT ship. Does NOT skip parent REVIEW/SKEPTIC. Exit: re-VI then return to parent.",
+      "terminal": true,
+      "mutate_src": false,
+      "on_enter": [
+        "assert_not_dev_candidate_skip",
+        "hand_off_re_vi_then_parent"
+      ],
+      "exit_policy": "re_VI_then_parent_VERIFY_REVIEW_SKEPTIC"
+    },
+    "FAIL_GAP": {
+      "description": "GauntletRound.verdict==FAIL_GAP. Record biggest_gap. Loop to next ROUND_N if under cap; else FINAL_FAIL or ESCALATE.",
+      "mutate_src": false,
+      "required_fields": [
+        "biggest_gap",
+        "round"
+      ],
+      "on_enter": [
+        "append_thin_ledger_gap"
+      ]
+    },
+    "FINAL_FAIL": {
+      "description": "Hard fail after max_rounds cap or fail-closed critic/evidence breach without approved rework. Not used for soft PAUSE.",
+      "terminal": true,
+      "mutate_src": false
+    },
+    "ESCALATE": {
+      "description": "GauntletRound.verdict==ESCALATE or human escalate. Ask owner. Not an implicit WIN.",
+      "terminal": true,
+      "mutate_src": false,
+      "actor": "owner"
+    },
+    "SUB_DEAD": {
+      "description": "Subscription/pool exhausted (429/cap). Ask owner switch-sub / extend / stop. Never silent die. Failover must change subscription_pool across ALL gateways.",
+      "mutate_src": false,
+      "on_enter": [
+        "ask_owner_switch_extend_stop",
+        "mark_pool_dead_for_run"
+      ],
+      "resume_to": [
+        "ROUND_N",
+        "CRITIC",
+        "GOV_REVIEW",
+        "ABORTED",
+        "PAUSED"
+      ]
+    },
+    "GOV_REVIEW": {
+      "description": "Optional Loop Governor when max_rounds >= 10. Meta trajectory only. Does not judge bar or rewrite PLAN.",
+      "mutate_src": false,
+      "actor": "Loop-Governor",
+      "optional": true,
+      "required_evidence": [
+        "GovernorVerdict/v1"
+      ]
+    },
+    "ABORTED": {
+      "description": "owner or Governor STOP_REASSESS / human abort. No done claim. No WIN.",
+      "terminal": true,
+      "mutate_src": false
+    }
+  },
+  "transitions": [
+    {
+      "from": "HOLD",
+      "to": "BAR_GATED",
+      "when": "owner_or_operator_enters_taste_risk_ui_and_bar_candidates_ready"
+    },
+    {
+      "from": "HOLD",
+      "to": "PAUSED",
+      "when": "flags_PAUSE_or_soft_payg_await"
+    },
+    {
+      "from": "BAR_GATED",
+      "to": "ROUND_N",
+      "when": "bar_fetchable && max_rounds_asked && one_taste_pack && not_security_surface"
+    },
+    {
+      "from": "BAR_GATED",
+      "to": "PAUSED",
+      "when": "flags_PAUSE_or_soft_payg_await"
+    },
+    {
+      "from": "BAR_GATED",
+      "to": "ABORTED",
+      "when": "security_surface_detected_or_owner_abort"
+    },
+    {
+      "from": "ROUND_N",
+      "to": "CRITIC",
+      "when": "builder_artifacts_ready && artifact_paths_present"
+    },
+    {
+      "from": "ROUND_N",
+      "to": "PAUSED",
+      "when": "flags_PAUSE_or_soft_payg_await"
+    },
+    {
+      "from": "ROUND_N",
+      "to": "SUB_DEAD",
+      "when": "pool_429_or_cap"
+    },
+    {
+      "from": "ROUND_N",
+      "to": "GOV_REVIEW",
+      "when": "governor_tick_and_rounds_gte_10"
+    },
+    {
+      "from": "CRITIC",
+      "to": "WIN",
+      "when": "GauntletRound.verdict==WIN && critic_vision_ok && evidence_rendered_only"
+    },
+    {
+      "from": "CRITIC",
+      "to": "FAIL_GAP",
+      "when": "GauntletRound.verdict==FAIL_GAP"
+    },
+    {
+      "from": "CRITIC",
+      "to": "FINAL_FAIL",
+      "when": "GauntletRound.verdict==FINAL_FAIL || critic_missing_vision || evidence_invalid"
+    },
+    {
+      "from": "CRITIC",
+      "to": "ESCALATE",
+      "when": "GauntletRound.verdict==ESCALATE"
+    },
+    {
+      "from": "CRITIC",
+      "to": "PAUSED",
+      "when": "flags_PAUSE_or_soft_payg_await"
+    },
+    {
+      "from": "CRITIC",
+      "to": "SUB_DEAD",
+      "when": "pool_429_or_cap"
+    },
+    {
+      "from": "FAIL_GAP",
+      "to": "ROUND_N",
+      "when": "round_lt_max_rounds"
+    },
+    {
+      "from": "FAIL_GAP",
+      "to": "FINAL_FAIL",
+      "when": "round_gte_max_rounds"
+    },
+    {
+      "from": "FAIL_GAP",
+      "to": "ESCALATE",
+      "when": "owner_or_governor_escalate"
+    },
+    {
+      "from": "FAIL_GAP",
+      "to": "PAUSED",
+      "when": "flags_PAUSE_or_soft_payg_await"
+    },
+    {
+      "from": "FAIL_GAP",
+      "to": "GOV_REVIEW",
+      "when": "governor_tick_and_rounds_gte_10"
+    },
+    {
+      "from": "PAUSED",
+      "to": "BAR_GATED",
+      "when": "PAUSE_cleared && resume_phase==bar"
+    },
+    {
+      "from": "PAUSED",
+      "to": "ROUND_N",
+      "when": "PAUSE_cleared && resume_phase==round"
+    },
+    {
+      "from": "PAUSED",
+      "to": "CRITIC",
+      "when": "PAUSE_cleared && resume_phase==critic"
+    },
+    {
+      "from": "PAUSED",
+      "to": "FAIL_GAP",
+      "when": "PAUSE_cleared && resume_phase==fail_gap"
+    },
+    {
+      "from": "PAUSED",
+      "to": "GOV_REVIEW",
+      "when": "PAUSE_cleared && resume_phase==gov"
+    },
+    {
+      "from": "PAUSED",
+      "to": "ABORTED",
+      "when": "owner_abort_while_paused"
+    },
+    {
+      "from": "SUB_DEAD",
+      "to": "ROUND_N",
+      "when": "owner_switch_sub_or_extend && resume_phase==round"
+    },
+    {
+      "from": "SUB_DEAD",
+      "to": "CRITIC",
+      "when": "owner_switch_sub_or_extend && resume_phase==critic"
+    },
+    {
+      "from": "SUB_DEAD",
+      "to": "PAUSED",
+      "when": "flags_PAUSE_or_soft_payg_await"
+    },
+    {
+      "from": "SUB_DEAD",
+      "to": "ABORTED",
+      "when": "owner_stop"
+    },
+    {
+      "from": "GOV_REVIEW",
+      "to": "ROUND_N",
+      "when": "GovernorVerdict.recommend==continue"
+    },
+    {
+      "from": "GOV_REVIEW",
+      "to": "ABORTED",
+      "when": "GovernorVerdict.recommend in [stop,reassess]"
+    },
+    {
+      "from": "GOV_REVIEW",
+      "to": "PAUSED",
+      "when": "flags_PAUSE_or_soft_payg_await"
+    },
+    {
+      "from": "*",
+      "to": "ABORTED",
+      "when": "owner_abort"
+    },
+    {
+      "from": "*",
+      "to": "PAUSED",
+      "when": "flags_PAUSE_present",
+      "notes": "Soft pause from any non-terminal state; idle resume, not FINAL_FAIL"
+    }
+  ],
+  "illegal_transitions": [
+    {
+      "any": "builder_critic_same_lab",
+      "reason": "Anti-collision: builder != critic lab"
+    },
+    {
+      "any": "ui_critic_without_vision",
+      "reason": "UI critic requires vision"
+    },
+    {
+      "any": "failover_same_subscription_pool",
+      "reason": "host-native and gateway mirror of same sub are ONE pool; no same-pool hop"
+    },
+    {
+      "any": "[ADD_PROVIDER]_to_[ADD_PROVIDER]_same_sub_hop",
+      "reason": "[ADD_PROVIDER] share one cap; not a failover"
+    },
+    {
+      "any": "stacking_taste_packs",
+      "reason": "ONE taste pack per gauntlet run"
+    },
+    {
+      "any": "gauntlet_on_auth_rls_stripe_webhooks_phi_secrets",
+      "reason": "security_surfaces_off; wrong tool"
+    },
+    {
+      "from": "WIN",
+      "to": "any_live_merge",
+      "reason": "WIN != ship; never merge main/master"
+    },
+    {
+      "any": "gauntlet_win_skip_to_DEV_CANDIDATE",
+      "reason": "Must re-VI and return to parent REVIEW+SKEPTIC"
+    },
+    {
+      "any": "vi_or_gauntlet_merge",
+      "reason": "VI/gauntlet never merge"
+    },
+    {
+      "any": "merge_to_main_or_master_by_agent",
+      "reason": "Land never; owner merges live only via parent OWNER_TEST"
+    },
+    {
+      "any": "critic_judges_builder_prose",
+      "reason": "Rendered artifacts only"
+    },
+    {
+      "any": "evidence_producer_writes_verdict",
+      "reason": "evidence_producer_neq_verdict_writer"
+    },
+    {
+      "any": "governor_rewrite_plan_or_judge_bar",
+      "reason": "Governor meta-only"
+    },
+    {
+      "any": "automatic_payg_with_prod_secrets",
+      "reason": "owner confirm; scrub secrets"
+    },
+    {
+      "any": "hard_kill_on_PAUSE",
+      "reason": "Soft pause: PAUSE or soft PAYG -> PAUSED idle resume, not FINAL_FAIL"
+    }
+  ],
+  "actors": {
+    "gauntlet-builder": {
+      "mutate_src": "ui_candidate_scoped",
+      "fresh_per_round": true,
+      "notes": "host agent gauntlet-builder; gold: strong builder model [ADD_MODEL_HERE]"
+    },
+    "gauntlet-critic": {
+      "mutate_src": false,
+      "fresh_per_round": true,
+      "requires_vision": true,
+      "notes": "host agent gauntlet-critic; gold: high-reasoning critic (different lab from builder); emits GauntletRound/v1"
+    },
+    "Visual-inspector": {
+      "mutate_src": false,
+      "role": "hard_gate_pre_and_post_gauntlet",
+      "notes": "VI scripts outside product repo; never merges"
+    },
+    "Loop-Governor": {
+      "optional": true,
+      "min_rounds": 10,
+      "mutate_src": false
+    }
+  },
+  "enum_map_gauntlet_round": {
+    "schema": "GauntletRound/v1",
+    "verdict": [
+      "WIN",
+      "FAIL_GAP",
+      "FINAL_FAIL",
+      "ESCALATE"
+    ],
+    "required_fields": [
+      "schema",
+      "run_id",
+      "round",
+      "bar_ref",
+      "builder_pool",
+      "critic_pool",
+      "verdict"
+    ],
+    "notes": "No separate CriticVerdict/v1 this slice; use GauntletRound.verdict. Optional CriticVerdict later if blind binary needs its own contract."
+  },
+  "canonical_runner_bind": true,
+  "slim_stub": "./example-ui-gauntlet.json"
+}
+

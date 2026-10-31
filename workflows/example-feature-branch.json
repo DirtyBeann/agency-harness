@@ -1,0 +1,8 @@
+{
+  "id": "example-feature-branch",
+  "version": "1.0.0",
+  "status": "example",
+  "canonical": "./example-feature-branch.states.json",
+  "human": "./example-feature-branch.md",
+  "note": "Runner binds the .states.json file only. This stub is a pointer."
+}

@@ -1,0 +1,40 @@
+{
+  "id": "10-review-pass-security-deny",
+  "title": "gate_review must exit 1 when security denies",
+  "check": "gate_review",
+  "review": {
+    "schema": "ReviewVerdict/v1",
+    "decision": "pass",
+    "summary": "Synthetic fixture: review pass but security deny",
+    "requirementsChecked": [
+      {
+        "id": "AC-1",
+        "status": "pass"
+      }
+    ],
+    "issues": [],
+    "failureModes": [],
+    "evidence_refs": [
+      "failures/cases/10-review-pass-security-deny/input.json"
+    ]
+  },
+  "security": {
+    "schema": "SecurityVerdict/v1",
+    "decision": "deny",
+    "risk_level": "high",
+    "reason": "Synthetic fixture: auth finding blocks gate",
+    "findings": [
+      {
+        "severity": "high",
+        "category": "auth",
+        "message": "synthetic auth gap"
+      }
+    ],
+    "failureModes": [
+      "auth_bypass"
+    ],
+    "evidence_refs": [
+      "failures/cases/10-review-pass-security-deny/input.json"
+    ]
+  }
+}

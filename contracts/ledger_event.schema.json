@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://[PRIVATE_WORKSPACE].local/harness/contracts/ledger_event.schema.json",
+  "title": "LedgerEvent",
+  "description": "Thin append-only ledger event. Redact-by-default. FORBIDDEN anywhere: raw tool output, env, headers, tokens, PHI, webhook bodies, customer PII, .env contents. Writers must jsonschema-validate and refuse on failure.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "run_id",
+    "ts",
+    "state",
+    "event"
+  ],
+  "properties": {
+    "schema": {
+      "const": "LedgerEvent/v1"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9_.:-]+$"
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time",
+      "maxLength": 40
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "HOLD",
+        "SCOPE_LOCKED",
+        "ARCHITECT_READY",
+        "PLAN_APPROVED",
+        "APPLYING",
+        "VERIFY",
+        "REVIEW",
+        "SKEPTIC",
+        "DEV_CANDIDATE",
+        "OWNER_TEST",
+        "LIVE_GO",
+        "LIVE_NOGO",
+        "SUB_DEAD",
+        "GOV_REVIEW",
+        "ABORTED",
+        "FINAL_FAIL",
+        "ROUND_START",
+        "ROUND_END",
+        "OTHER"
+      ]
+    },
+    "event": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9_.:-]+$"
+    },
+    "lane": {
+      "type": "string",
+      "enum": [
+        "platform",
+        "design",
+        "other"
+      ]
+    },
+    "piece_id": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9_.:-]+$"
+    },
+    "round": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "role": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9_.:-]+$"
+    },
+    "model_id": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9_./:+-]+$"
+    },
+    "pool_id": {
+      "type": "string",
+      "enum": [
+        "pool-[ADD_MODEL_HERE]",
+        "pool-[ADD_PROVIDER]",
+        "pool-a",
+        "pool-b",
+        "pool-c",
+        "pool-d",
+        "pool-payg",
+        "pool-e",
+        "pool-local",
+        "pool-unknown"
+      ]
+    },
+    "gateway": {
+      "type": "string",
+      "enum": [
+        "host_native",
+        "[ADD_LLM_GATEWAY]",
+        "local_gateway",
+        "local",
+        "unknown"
+      ]
+    },
+    "verdict": {
+      "type": "string",
+      "maxLength": 32,
+      "pattern": "^[A-Za-z0-9_.:-]+$"
+    },
+    "gap": {
+      "type": "string",
+      "maxLength": 240
+    },
+    "artifact_paths": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "string",
+        "maxLength": 512,
+        "pattern": "^(file://|https://|[A-Za-z]:\\\\|\\\\\\\\|/|\\./|ledger/|artifacts/|contracts/|docs/)"
+      }
+    },
+    "bar_ref": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9_./:-]+$"
+    },
+    "failover": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "from_pool",
+        "to_pool",
+        "reason"
+      ],
+      "properties": {
+        "from_pool": {
+          "type": "string",
+          "enum": [
+            "pool-[ADD_MODEL_HERE]",
+            "pool-[ADD_PROVIDER]",
+            "pool-a",
+            "pool-b",
+            "pool-c",
+            "pool-d",
+            "pool-payg",
+            "pool-e",
+            "pool-local",
+            "pool-unknown"
+          ]
+        },
+        "to_pool": {
+          "type": "string",
+          "enum": [
+            "pool-[ADD_MODEL_HERE]",
+            "pool-[ADD_PROVIDER]",
+            "pool-a",
+            "pool-b",
+            "pool-c",
+            "pool-d",
+            "pool-payg",
+            "pool-e",
+            "pool-local",
+            "pool-unknown"
+          ]
+        },
+        "from_model": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "to_model": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "quota_429",
+            "timeout",
+            "error",
+            "collision_skip",
+            "vision_required",
+            "owner_switch",
+            "other"
+          ]
+        }
+      }
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 240
+    }
+  },
+  "allOf": [
+    {
+      "description": "Reject secret-shaped substrings in free-text fields",
+      "properties": {
+        "gap": {
+          "not": {
+            "pattern": "(?i)(sk_live_|sk_test_|rk_live_|whsec_|ghp_|github_pat_|gho_|xox[baprs]-|BEGIN [A-Z ]*PRIVATE KEY|eyJ[A-Za-z0-9_-]{20,}|SENTRY_ACCESS_TOKEN|API_KEY\\s*=|password\\s*=|Bearer\\s+[A-Za-z0-9._\\-]{20,})"
+          }
+        },
+        "notes": {
+          "not": {
+            "pattern": "(?i)(sk_live_|sk_test_|rk_live_|whsec_|ghp_|github_pat_|gho_|xox[baprs]-|BEGIN [A-Z ]*PRIVATE KEY|eyJ[A-Za-z0-9_-]{20,}|SENTRY_ACCESS_TOKEN|API_KEY\\s*=|password\\s*=|Bearer\\s+[A-Za-z0-9._\\-]{20,})"
+          }
+        }
+      }
+    }
+  ]
+}
+

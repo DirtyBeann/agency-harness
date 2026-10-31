@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://[PRIVATE_WORKSPACE].local/harness/governor_verdict.schema.json",
+  "title": "GovernorVerdict",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "round",
+    "progress",
+    "recommend",
+    "reason",
+    "not_judged"
+  ],
+  "properties": {
+    "schema": {
+      "const": "GovernorVerdict/v1"
+    },
+    "round": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "from": {
+          "type": "integer"
+        },
+        "to": {
+          "type": "integer"
+        }
+      }
+    },
+    "progress": {
+      "enum": [
+        "improving",
+        "flat",
+        "regressing",
+        "hallucinating"
+      ]
+    },
+    "recommend": {
+      "enum": [
+        "continue",
+        "stop",
+        "reassess"
+      ]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "reason": {
+      "type": "string",
+      "maxLength": 240
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "detail"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "gap_unchanged",
+              "artifact_unchanged",
+              "critic_flipflop",
+              "model_thrash",
+              "claim_without_artifact"
+            ]
+          },
+          "detail": {
+            "type": "string",
+            "maxLength": 240
+          },
+          "rounds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "not_judged": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "bar",
+          "diff_defects",
+          "security",
+          "done_claims"
+        ]
+      }
+    },
+    "models": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "governor": {
+          "type": "string"
+        },
+        "builder_current": {
+          "type": "string"
+        },
+        "critic_current": {
+          "type": "string"
+        }
+      }
+    },
+    "ask_owner": {
+      "enum": [
+        "extend",
+        "stop",
+        "switch_sub",
+        "none"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "description": "Reject secret-shaped substrings in free-text",
+      "properties": {
+        "reason": {
+          "not": {
+            "pattern": "(?i)(sk_live_|sk_test_|rk_live_|whsec_|ghp_|github_pat_|gho_|xox[baprs]-|BEGIN [A-Z ]*PRIVATE KEY|eyJ[A-Za-z0-9_-]{20,}|SENTRY_ACCESS_TOKEN|API_KEY\\s*=|password\\s*=|Bearer\\s+[A-Za-z0-9._\\-]{20,})"
+          }
+        }
+      }
+    }
+  ],
+  "description": "GovernorVerdict/v1. Meta trajectory only. No PLAN rewrites. evidence.detail must not contain secrets/PHI/raw tool bodies."
+}

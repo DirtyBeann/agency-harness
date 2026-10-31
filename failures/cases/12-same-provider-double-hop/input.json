@@ -1,0 +1,21 @@
+{
+  "id": "12-[ADD_PROVIDER]-[ADD_PROVIDER]-failover",
+  "title": "[ADD_PROVIDER] to [ADD_PROVIDER] failover / same-lab hop (illegal)",
+  "check": "same_pool",
+  "kind": "gauntlet",
+  "payload": {
+    "schema": "GauntletRound/v1",
+    "run_id": "synth-[ADD_PROVIDER]-hop-001",
+    "round": 2,
+    "bar_ref": "bars/synth-checkout-v1",
+    "builder_pool": "pool-[ADD_PROVIDER]",
+    "critic_pool": "pool-[ADD_PROVIDER]",
+    "builder_model": "qwen-synth-a",
+    "critic_model": "qwen-synth-b",
+    "verdict": "FAIL_GAP",
+    "biggest_gap": "synthetic contrast gap",
+    "artifact_paths": [
+      "artifacts/synth/checkout.png"
+    ]
+  }
+}

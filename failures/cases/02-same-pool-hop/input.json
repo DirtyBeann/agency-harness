@@ -1,0 +1,24 @@
+{
+  "id": "02-same-pool-hop",
+  "title": "Builder and critic same subscription pool (illegal)",
+  "check": "same_pool",
+  "kind": "gauntlet",
+  "payload": {
+    "schema": "GauntletRound/v1",
+    "run_id": "synth-same-pool-001",
+    "round": 1,
+    "bar_ref": "bars/synth-login-v1",
+    "builder_model": "synth-builder",
+    "builder_pool": "pool-[ADD_PROVIDER]",
+    "critic_model": "synth-critic",
+    "critic_pool": "pool-[ADD_PROVIDER]",
+    "verdict": "WIN",
+    "biggest_gap": "none claimed",
+    "artifact_paths": [
+      "artifacts/synth/round1.png"
+    ],
+    "evidence_paths": [
+      "artifacts/synth/round1-a11y.json"
+    ]
+  }
+}

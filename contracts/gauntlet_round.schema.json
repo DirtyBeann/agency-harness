@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://[PRIVATE_WORKSPACE].local/harness/gauntlet_round.schema.json",
+  "title": "GauntletRound",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "run_id",
+    "round",
+    "bar_ref",
+    "builder_pool",
+    "critic_pool",
+    "verdict"
+  ],
+  "properties": {
+    "schema": {
+      "const": "GauntletRound/v1"
+    },
+    "run_id": {
+      "type": "string",
+      "maxLength": 64
+    },
+    "round": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "piece_id": {
+      "type": "string"
+    },
+    "bar_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "builder_model": {
+      "type": "string"
+    },
+    "builder_pool": {
+      "type": "string"
+    },
+    "critic_model": {
+      "type": "string"
+    },
+    "critic_pool": {
+      "type": "string"
+    },
+    "verdict": {
+      "enum": [
+        "WIN",
+        "FAIL_GAP",
+        "FINAL_FAIL",
+        "ESCALATE"
+      ]
+    },
+    "biggest_gap": {
+      "type": "string",
+      "maxLength": 240
+    },
+    "artifact_paths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 512,
+        "pattern": "^(file://|https://|[A-Za-z]:\\\\|\\\\\\\\|/|\\./|ledger/|artifacts/|contracts/|docs/)"
+      },
+      "maxItems": 16
+    },
+    "evidence_paths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 512,
+        "pattern": "^(file://|https://|[A-Za-z]:\\\\|\\\\\\\\|/|\\./|ledger/|artifacts/|contracts/|docs/)"
+      },
+      "maxItems": 16
+    }
+  },
+  "allOf": [
+    {
+      "description": "Reject secret-shaped substrings in free-text",
+      "properties": {
+        "biggest_gap": {
+          "not": {
+            "pattern": "(?i)(sk_live_|sk_test_|rk_live_|whsec_|ghp_|github_pat_|gho_|xox[baprs]-|BEGIN [A-Z ]*PRIVATE KEY|eyJ[A-Za-z0-9_-]{20,}|SENTRY_ACCESS_TOKEN|API_KEY\\s*=|password\\s*=|Bearer\\s+[A-Za-z0-9._\\-]{20,})"
+          }
+        }
+      }
+    }
+  ],
+  "description": "GauntletRound/v1. Paths only for artifacts/evidence. No raw screenshots inline."
+}

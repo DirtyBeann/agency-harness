@@ -1,0 +1,8 @@
+{
+  "id": "example-ui-gauntlet",
+  "version": "1.0.0",
+  "status": "example",
+  "canonical": "./example-ui-gauntlet.states.json",
+  "human": "./example-ui-gauntlet.md",
+  "note": "Runner binds the .states.json file only. This stub is a pointer."
+}

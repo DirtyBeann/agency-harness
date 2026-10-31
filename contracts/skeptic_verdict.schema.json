@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://[PRIVATE_WORKSPACE].local/harness/skeptic_verdict.schema.json",
+  "title": "SkepticVerdict",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "verdict",
+    "rounds_used"
+  ],
+  "properties": {
+    "schema": {
+      "const": "SkepticVerdict/v1"
+    },
+    "verdict": {
+      "enum": [
+        "PASS",
+        "NOT_READY",
+        "BLOCKED"
+      ]
+    },
+    "rounds_used": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2
+    },
+    "failures": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 240
+      },
+      "maxItems": 32
+    },
+    "skipped": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 240
+      },
+      "maxItems": 32
+    },
+    "unverified": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 240
+      },
+      "maxItems": 32
+    },
+    "incomplete": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 240
+      },
+      "maxItems": 32
+    },
+    "violations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 240
+      },
+      "maxItems": 32
+    },
+    "evidence_index": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 240
+      },
+      "maxItems": 32
+    },
+    "next": {
+      "type": "string",
+      "maxLength": 240
+    },
+    "artifact_paths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 512,
+        "pattern": "^(file://|https://|[A-Za-z]:\\\\|\\\\\\\\|/|\\./|ledger/|artifacts/|contracts/|docs/)"
+      },
+      "maxItems": 16
+    }
+  },
+  "allOf": [
+    {
+      "description": "Reject secret-shaped substrings in free-text",
+      "properties": {
+        "next": {
+          "not": {
+            "pattern": "(?i)(sk_live_|sk_test_|rk_live_|whsec_|ghp_|github_pat_|gho_|xox[baprs]-|BEGIN [A-Z ]*PRIVATE KEY|eyJ[A-Za-z0-9_-]{20,}|SENTRY_ACCESS_TOKEN|API_KEY\\s*=|password\\s*=|Bearer\\s+[A-Za-z0-9._\\-]{20,})"
+          }
+        }
+      }
+    }
+  ],
+  "description": "SkepticVerdict/v1. Evidence labels only. No log dumps or secret material."
+}
