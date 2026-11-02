@@ -27,7 +27,7 @@ See `ORCHESTRATION.md`. Short version: Conductor (plans, delegates), Builder tie
 python -m pip install -r requirements.txt
 python scripts/validate_setup.py            # fails until config/models.yaml is filled
 python scripts/binder_smoke.py --dry-run    # binder smoke tests
-python scripts/run_failure_replay.py        # 13 regression fixtures
+python scripts/run_failure_replay.py        # 18 regression fixtures
 python scripts/advance.py --workflow example-feature-branch --from HOLD --list-next
 python scripts/run_state.py --workflow example-feature-branch --from HOLD --to SCOPE_LOCKED --flags-dir flags --dry-run
 ```

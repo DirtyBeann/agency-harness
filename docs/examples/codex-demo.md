@@ -59,9 +59,13 @@ Re-run in a fresh copy with no `tmp/` and `PYTHONIOENCODING=cp1252`:
 
 ```text
 python scripts/run_failure_replay.py
-summary: 13 passed, 0 missed, 13 total
+summary: 18 passed, 0 missed, 18 total
 ok: all failure-replay fixtures matched expected outcomes
 
 python scripts/binder_smoke.py --dry-run
-RESULT  pass=11  fail=0
+RESULT  pass=12  fail=0
 ```
+
+(Counts refreshed 2026-11-02 after the security review fixes: the replay grew
+from 13 to 18 cases, binder_smoke from 11 to 12 checks, and the dry-run scratch
+dir is auto-cleaned.)

@@ -2,7 +2,7 @@
 
 Fail-closed rails for running a team of AI coding agents.
 
-By Jason Escobar ([@DirtyBeann](https://github.com/DirtyBeann)) of [MadeByEsco](https://madebyesco.com).
+By Jason Escobar ([@DirtyBeann](https://github.com/DirtyBeann)), JKMK Ventures LLC, [MadeByEsco](https://madebyesco.com).
 
 Agency Harness gives your coding agents (Codex CLI, Kilo Code, Grok Build CLI, OpenCode, or anything that can run Python) a shared rulebook they cannot quietly skip. Agents propose work. A small Python "binder" CLI decides whether each step is allowed. Reviews, security checks, and skeptic passes are written as strict JSON verdicts, and anything missing, malformed, or unsafe is refused by default.
 
@@ -16,7 +16,7 @@ It is a sanitized, portable version of the setup I use to run my own multi-agent
 - **Routing rules.** Builder and critic may not run on the same subscription pool, and pay-as-you-go hops can require a one-time human OK (`flags/payg_confirm.on`).
 - **Kill switches.** Dropping a `flags/PAUSE` file halts mutating transitions.
 - **Redacting ledger.** `scripts/append_ledger.py` refuses secret-shaped text before it hits the log.
-- **Failure replay.** `failures/cases/` holds 13 synthetic regression cases (false skeptic pass, same-pool hop, missing verdicts, secret in ledger, and more) that must keep failing the right way.
+- **Failure replay.** `failures/cases/` holds 18 synthetic regression cases (false skeptic pass, same-pool hop, missing verdicts, secret in ledger, gate bypass attempts, and more) that must keep failing the right way. A unittest suite in `tests/` covers the binder security rules end to end.
 - **Skills and adapters.** `skills/` contains host-agnostic skill files that teach an agent when to call the CLI. `adapters/` has install notes and example configs for Codex CLI, Kilo Code, Grok Build CLI, and OpenCode. A root `AGENTS.md` gives any agent the house rules.
 
 ## Requirements
@@ -46,6 +46,7 @@ cp config/models.example.yaml config/models.yaml   # Windows: copy config\models
 python scripts/validate_setup.py
 python scripts/binder_smoke.py --dry-run
 python scripts/run_failure_replay.py
+python -m unittest discover -s tests -v
 ```
 
 Try a transition:
@@ -82,7 +83,8 @@ Claude Code adapters are not included yet.
 |---|---|
 | Binder CLI (`run_state.py`, `advance.py`) | Enforced: non-zero exit means refused |
 | Verdict JSON Schema validation | Enforced: invalid verdict fails closed |
-| Failure replay and L1 checks | Enforced in CI or local smoke runs |
+| Failure replay, binder smoke, unit tests | Enforced in CI: `.github/workflows/tests.yml` runs them on every push and pull_request |
+| L1 checks (em-dash scan, axe wrapper) | Enforced in local smoke runs |
 | Host skill allowlist (for example Kilo deny-default) | Partly enforced, if you apply the adapter config |
 | `SKILL.md` instructions | Advice only; a model can ignore them |
 | Human operator | Final authority |
@@ -108,9 +110,9 @@ Skills teach the agent when to call the CLI. The CLI is the gate.
 
 ## Security
 
-- `config/models.yaml`, `.env`, `ledger/*.jsonl`, and `tmp/` are gitignored. Keep it that way.
+- `config/models.yaml`, `.env`, `ledger/*.jsonl`, `ledger/state/`, and `tmp/` are gitignored. Keep it that way.
 - Never paste live API keys into chat, the ledger, or git.
-- Strings like `sk_live_` inside the schemas and scripts are detection patterns, not credentials.
+- Strings like `sk_live_` and `sk-` inside the schemas and `scripts/binder_rules.py` are detection patterns, not credentials.
 
 See [`SECURITY.md`](./SECURITY.md) and [`docs/SHARING.md`](./docs/SHARING.md).
 

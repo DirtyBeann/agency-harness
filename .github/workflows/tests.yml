@@ -1,0 +1,26 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Failure replay fixtures
+        run: python scripts/run_failure_replay.py
+      - name: Binder smoke (dry-run)
+        run: python scripts/binder_smoke.py --dry-run
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v

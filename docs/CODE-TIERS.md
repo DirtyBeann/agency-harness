@@ -8,7 +8,7 @@ The conductor stays plan / orchestrate / UNIFY. APPLY goes to tiered implementer
 
 | Agent | Model | Role |
 |-------|-------|------|
-| conductor (e.g. `esco-conductor`) | **GUI-owned** (suggested: `[ADD_MODEL_HERE]`) | Plan / orchestrate / UNIFY |
+| conductor | **GUI-owned** (suggested: `[ADD_MODEL_HERE]`) | Plan / orchestrate / UNIFY |
 | `code-c` | **GUI-owned** (no hard pin) | Cheap / fast APPLY |
 | `code-b` | **GUI-owned** (no hard pin) | Default APPLY |
 | `code-a` | **GUI-owned** (no hard pin) | Max / escalated APPLY |

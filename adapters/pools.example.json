@@ -1,0 +1,54 @@
+{
+  "schema": "PoolMap/v1-example",
+  "notes": "Generic placeholder pool map referenced by workflows/*.states.json (runtime.pool_map). Replace every [ADD_*] placeholder with your own setup. Never put keys, account ids, or personal data here. A pool groups PROVIDERS BY SUBSCRIPTION: the unit of quota, rate limits, and failover.",
+  "critical_owner_rule": "host-native and gateway mirror of the same subscription are ONE pool. A failover must move to a different subscription pool, never to another gateway route of the same subscription.",
+  "pools": [
+    {
+      "pool_id": "pool-a",
+      "subscription": "[ADD_SUBSCRIPTION_A]",
+      "providers": ["[ADD_PROVIDER_HOST_NATIVE]", "[ADD_PROVIDER_GATEWAY_MIRROR]"],
+      "gateways": ["host_native", "[ADD_LLM_GATEWAY]"],
+      "notes": "Example of the critical rule: both entries above are the SAME subscription, so they count as one pool."
+    },
+    {
+      "pool_id": "pool-b",
+      "subscription": "[ADD_SUBSCRIPTION_B]",
+      "providers": ["[ADD_PROVIDER]"],
+      "gateways": ["host_native"]
+    },
+    {
+      "pool_id": "pool-c",
+      "subscription": "[ADD_SUBSCRIPTION_C]",
+      "providers": ["[ADD_PROVIDER]"],
+      "gateways": ["[ADD_LLM_GATEWAY]"]
+    },
+    {
+      "pool_id": "pool-d",
+      "subscription": "[ADD_SUBSCRIPTION_D]",
+      "providers": ["[ADD_PROVIDER]"],
+      "gateways": ["host_native"]
+    },
+    {
+      "pool_id": "pool-e",
+      "subscription": "[ADD_SUBSCRIPTION_E]",
+      "providers": ["[ADD_PROVIDER]"],
+      "gateways": ["[ADD_LLM_GATEWAY]"]
+    },
+    {
+      "pool_id": "pool-payg",
+      "billing": "pay_as_you_go",
+      "subscription": "[ADD_PAYG_ACCOUNT]",
+      "providers": ["[ADD_PROVIDER]"],
+      "gateways": ["[ADD_LLM_GATEWAY]"],
+      "notes": "PAYG hops can require a one-time owner OK first; see flags/payg_confirm.on.example."
+    },
+    {
+      "pool_id": "pool-local",
+      "billing": "self_hosted",
+      "subscription": "[ADD_LOCAL_SETUP]",
+      "providers": ["[ADD_LOCAL_RUNTIME]"],
+      "gateways": ["local_gateway"],
+      "notes": "Local models. Never a default for anything without an explicit owner decision."
+    }
+  ]
+}
