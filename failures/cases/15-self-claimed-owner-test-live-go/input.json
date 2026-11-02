@@ -1,0 +1,12 @@
+{
+  "id": "15-self-claimed-owner-test-live-go",
+  "title": "Caller self-claiming --from OWNER_TEST cannot jump to LIVE_GO",
+  "check": "binder_transition",
+  "dry_run": true,
+  "binder_args": [
+    "--workflow", "example-feature-branch",
+    "--from", "OWNER_TEST",
+    "--to", "LIVE_GO",
+    "--run-id", "replay-owner-01"
+  ]
+}

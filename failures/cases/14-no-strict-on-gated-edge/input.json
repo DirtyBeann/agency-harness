@@ -1,0 +1,13 @@
+{
+  "id": "14-no-strict-on-gated-edge",
+  "title": "--no-strict must not bypass the REVIEW->SKEPTIC verdict gate",
+  "check": "binder_transition",
+  "dry_run": true,
+  "binder_args": [
+    "--workflow", "example-feature-branch",
+    "--from", "REVIEW",
+    "--to", "SKEPTIC",
+    "--no-strict",
+    "--run-id", "replay-nostri-01"
+  ]
+}

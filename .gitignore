@@ -1,18 +1,14 @@
 config/models.yaml
 ledger/*.jsonl
+ledger/state/
 tmp/
+.agents/
 **/__pycache__/
 *.pyc
 .venv/
 venv/
+.env
 .DS_Store
 
 # Private ops proofs (keep local; do not publish)
 docs/private/
-tmp/
-**/__pycache__/
-.venv/
-venv/
-config/models.yaml
-.env
-*.pyc

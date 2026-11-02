@@ -1,0 +1,7 @@
+{
+  "expect": "fail",
+  "exit_code": 10,
+  "reason_contains": [
+    "PAUSE"
+  ]
+}

@@ -102,6 +102,20 @@ def main() -> None:
     dry = "--dry-run" in sys.argv
     (ROOT / "tmp").mkdir(parents=True, exist_ok=True)  # tmp/ is gitignored, so a fresh clone has none
     tmp = Path(tempfile.mkdtemp(prefix="binder_smoke_", dir=str(ROOT / "tmp")))
+    try:
+        code = run_cases(tmp, dry)
+    finally:
+        # --dry-run writes nothing worth keeping: clean the scratch dir so
+        # repeated runs do not litter tmp/binder_smoke_*. Non-dry runs keep
+        # fixtures for docs reference.
+        if dry:
+            shutil.rmtree(tmp, ignore_errors=True)
+            print(f"cleaned smoke tmp: {tmp} (--dry-run)")
+    raise SystemExit(code)
+
+
+def run_cases(tmp: Path, dry: bool) -> int:
+    global PASS, FAIL
     verdicts = tmp / "verdicts"
     flags_tmp = tmp / "flags"
     flags_tmp.mkdir(parents=True, exist_ok=True)
@@ -416,10 +430,7 @@ def main() -> None:
     )
 
     print(f"\nRESULT  pass={PASS}  fail={FAIL}  tmp={tmp}")
-    # Keep fixtures for docs reference; do not delete pause flag on live FLAGS
-    if FAIL:
-        raise SystemExit(1)
-    raise SystemExit(0)
+    return 1 if FAIL else 0
 
 
 if __name__ == "__main__":

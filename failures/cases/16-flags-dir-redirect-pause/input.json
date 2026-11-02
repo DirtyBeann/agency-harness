@@ -1,0 +1,5 @@
+{
+  "id": "16-flags-dir-redirect-pause",
+  "title": "--flags-dir redirect must not mask the canonical flags/PAUSE kill switch",
+  "check": "binder_flags_redirect"
+}

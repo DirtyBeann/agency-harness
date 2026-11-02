@@ -3,7 +3,9 @@
 
 Usage:
   advance.py --workflow example-feature-branch --from REVIEW [--list-next]
-  advance.py --workflow example-feature-branch --from REVIEW --to SKEPTIC [--strict/--no-strict]
+  advance.py --workflow example-feature-branch --from REVIEW --to SKEPTIC
+    (--strict is the default; --no-strict is dev-only and the binder refuses it
+     on gated transitions REVIEW->SKEPTIC and SKEPTIC->DEV_CANDIDATE)
 """
 from __future__ import annotations
 
@@ -27,7 +29,9 @@ def main() -> None:
     ap.add_argument("--from", dest="from_state", required=True)
     ap.add_argument("--to", dest="to_state", default="")
     ap.add_argument("--transition", dest="when", default="")
-    ap.add_argument("--strict", default=True, action=argparse.BooleanOptionalAction)
+    ap.add_argument("--strict", default=True, action=argparse.BooleanOptionalAction,
+                    help="dev-only. Verdict gates on gated transitions always run in the "
+                         "binder; --no-strict is refused on REVIEW->SKEPTIC and SKEPTIC->DEV_CANDIDATE")
     ap.add_argument("--run-id", default="")
     ap.add_argument("--verdicts-dir", default="")
     ap.add_argument("--flags-dir", default="")

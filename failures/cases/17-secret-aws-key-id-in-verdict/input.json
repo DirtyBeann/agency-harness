@@ -1,0 +1,11 @@
+{
+  "id": "17-secret-aws-key-id-in-verdict",
+  "title": "write_verdict must refuse an AWS access key id shape (built at runtime)",
+  "check": "runtime_secret_refuse",
+  "secret_kind": "aws",
+  "parts": {
+    "p1": "AK",
+    "p2": "IA",
+    "body": "Q0W9E8R7T6Y5U4I3"
+  }
+}

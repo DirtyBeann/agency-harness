@@ -22,7 +22,11 @@ from pathlib import Path
 from jsonschema import Draft202012Validator
 
 ROOT = Path(__file__).resolve().parents[1]
+SCRIPTS = ROOT / "scripts"
 DEFAULT_OUT = ROOT / "ledger" / "verdicts"
+sys.path.insert(0, str(SCRIPTS))
+import binder_rules  # shared secret-shape patterns (kept in sync with contracts)
+
 KIND_TO_SCHEMA = {
     "review": ROOT / "contracts" / "review_verdict.schema.json",
     "security": ROOT / "contracts" / "security_verdict.schema.json",
@@ -40,11 +44,6 @@ FORBIDDEN_KEY = re.compile(
     r"(secret|token|password|authorization|api[_-]?key|cookie|webhook.?body|private.?key|raw_tool|transcript|phi)",
     re.I,
 )
-SECRET_VALUE = re.compile(
-    r"(?i)(sk_live_|sk_test_|rk_live_|whsec_|ghp_|github_pat_|gho_|xox[baprs]-|"
-    r"BEGIN [A-Z ]*PRIVATE KEY|eyJ[A-Za-z0-9_-]{20,}|"
-    r"SENTRY_ACCESS_TOKEN|API_KEY\s*=|password\s*=|Bearer\s+[A-Za-z0-9._\-]{20,})"
-)
 
 
 def refuse(msg: str) -> None:
@@ -61,7 +60,7 @@ def walk_forbid(obj, path: str = "") -> None:
         for i, v in enumerate(obj):
             walk_forbid(v, f"{path}[{i}]")
     elif isinstance(obj, str):
-        if SECRET_VALUE.search(obj):
+        if binder_rules.looks_secret(obj):
             refuse(f"secret-shaped value at {path or '<root>'}")
 
 

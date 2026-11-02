@@ -30,6 +30,9 @@ CASES_DIR = ROOT / "failures" / "cases"
 CONTRACTS = ROOT / "contracts"
 SCRIPTS = ROOT / "scripts"
 
+sys.path.insert(0, str(SCRIPTS))
+import binder_rules  # shared rules: skeptic PASS evidence + secret patterns
+
 KIND_TO_SCHEMA = {
     "review": CONTRACTS / "review_verdict.schema.json",
     "security": CONTRACTS / "security_verdict.schema.json",
@@ -92,24 +95,15 @@ def run_check(inp: dict) -> tuple[int, str]:
     check = inp.get("check")
     if check == "skeptic_pass_requires_evidence":
         payload = inp["payload"]
+        if payload.get("verdict") == "PASS":
+            # Shared rule with the binder (scripts/binder_rules.py), checked
+            # before schema validation so the reason always names PASS/evidence.
+            ok, why = binder_rules.skeptic_pass_ok(payload)
+            if not ok:
+                return 1, why
         ok_schema, reason = schema_validate("skeptic", payload)
         if not ok_schema:
-            # schema fail is also a fail outcome for a bad PASS claim
             return 1, f"skeptic schema/evidence: {reason}"
-        if payload.get("verdict") == "PASS":
-            evidence = payload.get("evidence_index") or []
-            artifacts = payload.get("artifact_paths") or []
-            bad_open = (
-                payload.get("unverified")
-                or payload.get("incomplete")
-                or payload.get("failures")
-                or payload.get("violations")
-                or []
-            )
-            if not evidence and not artifacts:
-                return 1, "PASS without evidence_index/artifact_paths (false pass)"
-            if bad_open:
-                return 1, "PASS with open unverified/incomplete/failures/violations"
         return 0, "skeptic evidence rule ok"
 
     if check == "same_pool":
@@ -181,17 +175,100 @@ def run_check(inp: dict) -> tuple[int, str]:
             if "notes" in reason.lower() or "gap" in reason.lower() or "pattern" in reason.lower() or "not" in reason.lower():
                 return 1, f"refused: secret-shaped notes ({reason})"
             return 1, f"refused: {reason}"
-        # Double-check secret-shaped using same regex as contracts
-        secret_re = re.compile(
-            r"(?i)(sk_live_|sk_test_|rk_live_|whsec_|ghp_|github_pat_|gho_|xox[baprs]-|"
-            r"BEGIN [A-Z ]*PRIVATE KEY|eyJ[A-Za-z0-9_-]{20,}|"
-            r"SENTRY_ACCESS_TOKEN|API_KEY\s*=|password\s*=|Bearer\s+[A-Za-z0-9._\-]{20,})"
-        )
+        # Double-check secret-shaped using the shared binder rules
+        # (same patterns as contracts and write_verdict.py)
         for field in ("notes", "gap"):
             val = payload.get(field) or ""
-            if isinstance(val, str) and secret_re.search(val):
+            if isinstance(val, str) and binder_rules.looks_secret(val):
                 return 1, f"refused: secret-shaped value in {field}"
         return 0, "ledger ok"
+
+    if check == "binder_transition":
+        # Run scripts/run_state.py in an isolated temp env (flags, ledger state).
+        with tempfile.TemporaryDirectory(prefix="harness-binder-") as td:
+            tdir = Path(td)
+            flags = tdir / "flags"
+            flags.mkdir(parents=True, exist_ok=True)
+            state = tdir / "state"
+            state.mkdir(parents=True, exist_ok=True)
+            cmd = [
+                sys.executable,
+                str(SCRIPTS / "run_state.py"),
+                "--flags-dir", str(flags),
+                "--ledger-state-dir", str(state),
+            ]
+            for a in inp.get("binder_args", []):
+                cmd.append(str(a))
+            if inp.get("dry_run", True):
+                cmd.append("--dry-run")
+            proc = subprocess.run(cmd, capture_output=True, text=True)
+            out = (proc.stdout or "").strip() or (proc.stderr or "").strip()
+            return proc.returncode, out or f"binder exit {proc.returncode}"
+
+    if check == "binder_flags_redirect":
+        # Canonical flags/PAUSE must refuse even when --flags-dir points elsewhere.
+        # The PAUSE file is created only for this probe and always removed.
+        canonical = ROOT / "flags"
+        canonical.mkdir(parents=True, exist_ok=True)
+        pause = canonical / "PAUSE"
+        created = False
+        try:
+            if not pause.exists():
+                pause.write_text("replay: canonical pause probe\n", encoding="utf-8")
+                created = True
+            with tempfile.TemporaryDirectory(prefix="harness-binder-") as td:
+                flags = Path(td) / "flags"
+                flags.mkdir(parents=True, exist_ok=True)
+                cmd = [
+                    sys.executable,
+                    str(SCRIPTS / "run_state.py"),
+                    "--workflow", "example-feature-branch",
+                    "--from", "APPLYING",
+                    "--to", "VERIFY",
+                    "--flags-dir", str(flags),
+                    "--run-id", "replay-flags-01",
+                    "--dry-run",
+                ]
+                proc = subprocess.run(cmd, capture_output=True, text=True)
+                out = (proc.stdout or "").strip() or (proc.stderr or "").strip()
+                return proc.returncode, out or f"binder exit {proc.returncode}"
+        finally:
+            if created and pause.exists():
+                pause.unlink()
+
+    if check == "runtime_secret_refuse":
+        # Secret-shaped values are BUILT at runtime from parts so this repo never
+        # contains a literal key-shaped string. write_verdict.py must refuse.
+        kind = inp.get("secret_kind", "aws")
+        if kind == "aws":
+            secret = inp["parts"]["p1"] + inp["parts"]["p2"] + inp["parts"]["body"]
+        elif kind == "openai":
+            secret = inp["parts"]["prefix"] + inp["parts"]["kind"] + inp["parts"]["body"]
+        else:
+            return 1, f"unknown secret_kind: {kind}"
+        with tempfile.TemporaryDirectory(prefix="harness-secret-") as td:
+            tdir = Path(td)
+            verdict = {
+                "schema": "ReviewVerdict/v1",
+                "decision": "pass",
+                "summary": "probe summary containing " + secret + " inline",
+                "requirementsChecked": [{"id": "ac-1", "status": "pass"}],
+                "issues": [],
+                "failureModes": [],
+                "evidence_refs": ["docs/replay"],
+            }
+            src = tdir / "probe-review.json"
+            src.write_text(json.dumps(verdict, indent=2) + "\n", encoding="utf-8")
+            cmd = [
+                sys.executable,
+                str(SCRIPTS / "write_verdict.py"),
+                "--kind", "review",
+                "--json-file", str(src),
+                "--out-dir", str(tdir / "out"),
+            ]
+            proc = subprocess.run(cmd, capture_output=True, text=True)
+            out = (proc.stdout or "").strip() or (proc.stderr or "").strip()
+            return proc.returncode, out or f"write_verdict exit {proc.returncode}"
 
     if check == "illegal_transition":
         fr = inp.get("from_state")
