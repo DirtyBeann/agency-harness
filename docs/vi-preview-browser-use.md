@@ -16,7 +16,7 @@ Install `browser-use` with isolated helpers (`bu-chrome`, `bu-doctor`, `browser-
 ## One command
 
 ```powershell
-cd agency-harness-universal
+cd agency-harness
 powershell -File scripts\vi_preview.ps1 -Url "http://127.0.0.1:3000"
 ```
 

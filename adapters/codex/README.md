@@ -19,8 +19,8 @@ This pack does **not** ship Codex hooks or plugins. Skills and `AGENTS.md` teach
 **Recommended for this pack:** project-local skills
 
 ```text
-agency-harness-universal/.agents/skills/agency-advance/SKILL.md
-agency-harness-universal/.agents/skills/agency-replay/SKILL.md
+agency-harness/.agents/skills/agency-advance/SKILL.md
+agency-harness/.agents/skills/agency-replay/SKILL.md
 ```
 
 Run `install-skills.sh` or `install-skills.ps1` from this folder, or copy from `../../skills/`.

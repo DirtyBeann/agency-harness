@@ -20,7 +20,7 @@ That script stages a zip without `docs/private` and `tmp`.
 
 ## Public GitHub
 
-1. Fill `[ADD COPYRIGHT HOLDER]` in `LICENSE`.
+1. The `LICENSE` copyright holder is Jason Escobar; forks should add their own name for their changes.
 2. Confirm Security/Repo Audit clear.
 3. Push only the share zip contents (or a git init that never adds `docs/private/`).
 

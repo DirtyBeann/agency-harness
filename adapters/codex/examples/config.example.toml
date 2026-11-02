@@ -16,7 +16,7 @@ network_access = false   # the harness scripts do not need the network
 
 # Mark this repo as trusted so Codex loads its AGENTS.md and project skills.
 # Replace the path with where you cloned the repo.
-[projects."[ADD_ABSOLUTE_PATH_TO]/agency-harness-universal"]
+[projects."[ADD_ABSOLUTE_PATH_TO]/agency-harness"]
 trust_level = "trusted"
 
 # Optional: a separate profile for reviewer / security / skeptic roles,

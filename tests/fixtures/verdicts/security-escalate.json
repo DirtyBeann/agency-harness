@@ -2,7 +2,7 @@
   "schema": "SecurityVerdict/v1",
   "decision": "escalate",
   "risk_level": "medium",
-  "reason": "Smoke fixture: escalate for [OWNER]",
+  "reason": "Smoke fixture: escalate for operator",
   "findings": [
     {
       "severity": "medium",

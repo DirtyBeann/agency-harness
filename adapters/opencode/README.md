@@ -23,8 +23,8 @@ OpenCode loads skills from (project and global):
 **Recommended:** project `.opencode/skills/` inside this harness folder.
 
 ```text
-agency-harness-universal/.opencode/skills/agency-advance/SKILL.md
-agency-harness-universal/.opencode/skills/agency-replay/SKILL.md
+agency-harness/.opencode/skills/agency-advance/SKILL.md
+agency-harness/.opencode/skills/agency-replay/SKILL.md
 ```
 
 Each `SKILL.md` frontmatter `name` must match the folder name (already true for shipped skills).

@@ -5,7 +5,7 @@ param(
 $Root = Split-Path -Parent $PSScriptRoot
 if (-not $OutZip) {
   $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
-  $OutZip = Join-Path (Split-Path $Root) "agency-harness-universal-$stamp.zip"
+  $OutZip = Join-Path (Split-Path $Root) "agency-harness-$stamp.zip"
 }
 $stage = Join-Path $env:TEMP ("ah-universal-stage-" + [guid]::NewGuid().ToString("n"))
 New-Item -ItemType Directory -Force -Path $stage | Out-Null

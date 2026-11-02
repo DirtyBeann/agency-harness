@@ -392,6 +392,29 @@ def main() -> None:
         True,
     )
 
+    # --- advance.py --list-next ---
+    expect(
+        "legal advance --list-next HOLD",
+        run(
+            [
+                sys.executable,
+                str(SCRIPTS / "advance.py"),
+                "--workflow",
+                "example-feature-branch",
+                "--from",
+                "HOLD",
+                "--list-next",
+                "--flags-dir",
+                str(flags_tmp),
+                "--run-id",
+                "binder-smoke-list01",
+                "--dry-run",
+            ]
+        ),
+        0,
+        None,
+    )
+
     print(f"\nRESULT  pass={PASS}  fail={FAIL}  tmp={tmp}")
     # Keep fixtures for docs reference; do not delete pause flag on live FLAGS
     if FAIL:

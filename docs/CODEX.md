@@ -15,8 +15,8 @@ Never paste an API key into a Codex chat. Use `codex login` or an environment va
 ## 2. Open the repo
 
 ```bash
-git clone <this-repo-url> agency-harness-universal
-cd agency-harness-universal
+git clone https://github.com/DirtyBeann/agency-harness agency-harness
+cd agency-harness
 python -m pip install -r requirements.txt
 codex
 ```

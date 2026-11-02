@@ -21,8 +21,8 @@ Grok Build discovers:
 **Recommended for this pack:** project-local
 
 ```text
-agency-harness-universal/.grok/skills/agency-advance/SKILL.md
-agency-harness-universal/.grok/skills/agency-replay/SKILL.md
+agency-harness/.grok/skills/agency-advance/SKILL.md
+agency-harness/.grok/skills/agency-replay/SKILL.md
 ```
 
 Copy from `../../skills/...` or run `install-skills.sh` / `install-skills.ps1`.

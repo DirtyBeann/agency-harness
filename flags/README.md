@@ -9,20 +9,20 @@ Drop (or remove) small marker files here. Orchestrators / loop runners must chec
 
 ## How to pause a long loop
 ```bat
-echo. > [PRIVATE_FARM_HARNESS]\flags\PAUSE
+echo. > flags\PAUSE
 ```
 Resume:
 ```bat
-del [PRIVATE_FARM_HARNESS]\flags\PAUSE
+del flags\PAUSE
 ```
 
 ## How to enable soft PAYG confirm
 ```bat
-echo. > [PRIVATE_FARM_HARNESS]\flags\payg_confirm.on
+echo. > flags\payg_confirm.on
 ```
 Disable (default):
 ```bat
-del [PRIVATE_FARM_HARNESS]\flags\payg_confirm.on
+del flags\payg_confirm.on
 ```
 
 ## How to disable Governor

@@ -21,7 +21,7 @@ python scripts/run_state.py --workflow example-ui-gauntlet --from HOLD --to BAR_
 Before critic rounds that need rendered evidence, and on **re-VI** after WIN:
 
 ```powershell
-cd agency-harness-universal
+cd agency-harness
 powershell -File scripts\vi_preview.ps1 -Url "<preview-url>"
 ```
 

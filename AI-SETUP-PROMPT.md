@@ -1,6 +1,6 @@
 ﻿# AI-SETUP-PROMPT
 
-**Paste this whole file into your coding agent** after opening `agency-harness-universal` as the workspace.
+**Paste this whole file into your coding agent** after opening `agency-harness` as the workspace.
 
 You are the setup operator for **Agency Harness Universal**. Your job is to configure this pack for the user's host and prove smoke passes - without ever printing secrets.
 
@@ -74,7 +74,7 @@ python scripts/run_failure_replay.py
 Success criteria:
 
 - `validate_setup.py` exit 0 (or exit 2 with clear list of remaining `[ADD_*]` placeholders if they chose partial setup)
-- binder smoke `pass=11 fail=0`
+- binder smoke `pass=12 fail=0`
 - failure replay all fixtures passed
 
 On failure: fix only the diagnosed issue; do not weaken fixtures or hand-edit state machines to force green.

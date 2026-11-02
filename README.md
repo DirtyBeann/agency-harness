@@ -2,6 +2,8 @@
 
 Fail-closed rails for running a team of AI coding agents.
 
+By Jason Escobar ([@DirtyBeann](https://github.com/DirtyBeann)) of [MadeByEsco](https://madebyesco.com).
+
 Agency Harness gives your coding agents (Codex CLI, Kilo Code, Grok Build CLI, OpenCode, or anything that can run Python) a shared rulebook they cannot quietly skip. Agents propose work. A small Python "binder" CLI decides whether each step is allowed. Reviews, security checks, and skeptic passes are written as strict JSON verdicts, and anything missing, malformed, or unsafe is refused by default.
 
 It is a sanitized, portable version of the setup I use to run my own multi-agent coding farm. No keys, IPs, private model maps, or product code are included. Every model and provider is a placeholder you fill in.
@@ -36,8 +38,8 @@ It is a sanitized, portable version of the setup I use to run my own multi-agent
 ### Option B: manual
 
 ```bash
-git clone <this-repo-url> agency-harness-universal
-cd agency-harness-universal
+git clone https://github.com/DirtyBeann/agency-harness agency-harness
+cd agency-harness
 python -m pip install -r requirements.txt
 cp config/models.example.yaml config/models.yaml   # Windows: copy config\models.example.yaml config\models.yaml
 # edit config/models.yaml and replace every [ADD_*] placeholder
@@ -115,6 +117,10 @@ See [`SECURITY.md`](./SECURITY.md) and [`docs/SHARING.md`](./docs/SHARING.md).
 ## Status
 
 Early (v0.1.x). The core rails, schemas, and smoke tests work. Adapters are notes and examples, so expect to adjust paths for your setup.
+
+## Author
+
+Built and maintained by Jason Escobar ([@DirtyBeann](https://github.com/DirtyBeann)), [MadeByEsco](https://madebyesco.com), JKMK Ventures LLC. Licensed under Apache-2.0, see [LICENSE](./LICENSE).
 
 ## License
 

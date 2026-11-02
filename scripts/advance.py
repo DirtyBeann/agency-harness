@@ -2,7 +2,7 @@
 """Thin wrapper: check_flags -> run_state (optional propose) -> list next legal edges.
 
 Usage:
-  advance.py --workflow example-feature-branch --from REVIEW
+  advance.py --workflow example-feature-branch --from REVIEW [--list-next]
   advance.py --workflow example-feature-branch --from REVIEW --to SKEPTIC [--strict/--no-strict]
 """
 from __future__ import annotations
@@ -31,8 +31,11 @@ def main() -> None:
     ap.add_argument("--run-id", default="")
     ap.add_argument("--verdicts-dir", default="")
     ap.add_argument("--flags-dir", default="")
+    ap.add_argument("--list-next", action="store_true", help="List next legal edges from the current state")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
+    if args.list_next and (args.to_state or args.when):
+        ap.error("--list-next cannot be combined with --to or --transition")
 
     flag_cmd = [sys.executable, str(SCRIPTS / "check_flags.py")]
     fp = run(flag_cmd)
